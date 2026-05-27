@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+	<title>GVR_T_Notes</title>
+
+	<meta charset="UTF-8">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- BOOTSTRAP -->
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- BOOTSTRAP ICONS -->
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			background: #f8fafc;
+			font-family: Arial, sans-serif;
+			overflow-x: hidden;
+		}
+
+		/* NAVBAR */
+
+		.top-navbar {
+			height: 60px;
+			background: white;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 25px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+			position: sticky;
+			top: 0;
+			z-index: 1000;
+		}
+
+		.logo {
+			font-size: 24px;
+			font-weight: 700;
+			color: #2d9d78;
+		}
+
+		.search-box {
+			width: 35%;
+		}
+
+		.search-box input {
+			border-radius: 10px;
+			border: 1px solid #dfe6e9;
+			height: 40px;
+			font-size: 14px;
+		}
+
+		.nav-links a {
+			text-decoration: none;
+			margin-left: 18px;
+			color: #555;
+			font-size: 14px;
+			font-weight: 500;
+			transition: 0.2s;
+		}
+
+		.nav-links a:hover {
+			color: #2d9d78;
+		}
+
+		/* MAIN */
+
+		.main-container {
+			display: flex;
+		}
+
+		/* SIDEBAR */
+
+		.sidebar {
+			width: 220px;
+			background: white;
+			min-height: 100vh;
+			padding: 20px 15px;
+			box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+		}
+
+		.sidebar-title {
+			font-size: 18px;
+			font-weight: 700;
+			color: #2d9d78;
+			margin-bottom: 20px;
+		}
+
+		.subject-item {
+			background: #f8f9fa;
+			padding: 12px 14px;
+			border-radius: 10px;
+			margin-bottom: 10px;
+			font-size: 14px;
+			font-weight: 500;
+			transition: 0.2s;
+		}
+
+		.subject-item:hover {
+			background: #2d9d78;
+			color: white;
+			transform: translateX(4px);
+		}
+
+		/* CONTENT */
+
+		.content-area {
+			flex: 1;
+			padding: 25px;
+		}
+
+		/* HERO */
+
+		.hero-section {
+			background: linear-gradient(135deg, #2d9d78, #36c690);
+			color: white;
+			padding: 30px;
+			border-radius: 14px;
+			margin-bottom: 30px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		.hero-title {
+			font-size: 28px;
+			font-weight: 700;
+		}
+
+		.hero-subtitle {
+			margin-top: 12px;
+			font-size: 15px;
+			opacity: 0.9;
+		}
+
+		/* SUBJECT SECTION */
+
+		.section-title {
+			font-size: 24px;
+			font-weight: 700;
+			margin-bottom: 20px;
+			color: #2d9d78;
+		}
+
+		/* SUBJECT GRID */
+
+		.subject-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 18px;
+		}
+
+		.subject-card {
+			background: white;
+			border-radius: 14px;
+			padding: 18px;
+			transition: 0.2s;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		.subject-card:hover {
+			transform: translateY(-4px);
+		}
+
+		.subject-name {
+			font-size: 18px;
+			font-weight: 700;
+			color: #2d9d78;
+		}
+
+		.subject-description {
+			margin-top: 12px;
+			color: #666;
+			font-size: 14px;
+			line-height: 1.5;
+			min-height: 55px;
+		}
+
+		.card-buttons {
+			margin-top: 18px;
+		}
+
+		.card-buttons a {
+			border-radius: 8px;
+			margin-right: 8px;
+		}
+
+		/* FORM */
+
+		.form-card {
+			background: white;
+			padding: 22px;
+			border-radius: 14px;
+			margin-top: 40px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		.form-control {
+			border-radius: 10px;
+			font-size: 14px;
+		}
+
+		textarea {
+			resize: none;
+		}
+
+		/* STATS */
+
+		.stats-container {
+			display: flex;
+			gap: 15px;
+			margin-top: 30px;
+			flex-wrap: wrap;
+		}
+
+		.stats-card {
+			flex: 1;
+			min-width: 220px;
+			background: white;
+			padding: 20px;
+			border-radius: 14px;
+			text-align: center;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		.stats-card h2 {
+			color: #2d9d78;
+			font-size: 28px;
+			font-weight: 700;
+		}
+
+		.stats-card p {
+			margin-top: 8px;
+			font-size: 14px;
+			color: #666;
+			font-weight: 500;
+		}
+
+		@media(max-width:992px) {
+
+			.sidebar {
+				display: none;
+			}
+
+		}
+	</style>
+
+</head>
+
+<body>
+	<div class="d-flex justify-content-end
+	            align-items-center
+	            p-3
+	            bg-white
+	            shadow-sm">
+
+		<form th:action="@{/logout}" method="post">
+
+			<button type="submit" class="btn btn-outline-danger
+	                       rounded-pill
+	                       px-4">
+
+				🚪 Logout
+
+			</button>
+
+		</form>
+
+	</div>
+	<div th:replace="fragments/banner :: learningBanner"></div>
+	<!-- NAVBAR -->
+
+	<div class="top-navbar">
+
+		<div class="logo">
+
+			<i class="bi bi-journal-richtext"></i>
+			GVR_T_Notes
+
+		</div>
+
+		<div class="search-box">
+
+			<input type="text" class="form-control" placeholder="Search your knowledge...">
+
+		</div>
+
+		<div class="nav-links">
+
+			<a href="/">
+				<i class="bi bi-house"></i> Home
+			</a>
+
+			<a href="/topics">
+				<i class="bi bi-book"></i> Topics
+			</a>
+			<a href="/admin">
+
+				<i class="bi bi-speedometer2"></i>
+
+				Admin
+
+			</a>
+
+		</div>
+
+	</div>
+
+	<!-- MAIN -->
+
+	<div class="main-container">
+
+		<!-- SIDEBAR -->
+
+		<div class="sidebar">
+
+			<div class="sidebar-title">
+				Subjects
+			</div>
+
+			<!-- CLICKABLE SUBJECTS -->
+
+			<a th:each="sub : ${subjects}" th:href="@{/subjectTopics/{id}(id=${sub.id})}"
+				class="subject-item d-block text-decoration-none text-dark">
+
+				<i class="bi bi-folder2-open"></i>
+
+				<span th:text="${sub.name}"></span>
+
+			</a>
+
+		</div>
+
+		<!-- CONTENT -->
+
+		<div class="content-area">
+
+			<!-- HERO -->
+
+			<div class="hero-section">
+
+				<div class="hero-title">
+
+					Learning Is Never Stoppable 🚀
+
+				</div>
+
+				<div class="hero-subtitle">
+
+					If you stop learning, it's a dead end for you.
+
+				</div>
+
+			</div>
+
+			<!-- SUBJECTS -->
+
+			<div class="section-title">
+
+				<i class="bi bi-folder2-open"></i>
+				Your Learning Subjects
+
+			</div>
+
+			<!-- SUBJECT GRID -->
+
+			<div class="subject-grid">
+
+				<div class="subject-card" th:each="sub : ${subjects}">
+
+					<!-- NAME -->
+
+					<div class="subject-name" th:text="${sub.name}"></div>
+
+					<!-- DESCRIPTION -->
+
+					<div class="subject-description" th:text="${sub.description}"></div>
+
+					<!-- BUTTONS -->
+
+					<div class="card-buttons">
+
+						<!-- OPEN -->
+
+						<a th:href="@{/subjectTopics/{id}(id=${sub.id})}" class="btn btn-success btn-sm">
+
+							<i class="bi bi-book"></i>
+
+						</a>
+
+						<!-- EDIT -->
+
+						<a th:href="@{/editSubject/{id}(id=${sub.id})}" class="btn btn-warning btn-sm">
+
+							<i class="bi bi-pencil-square"></i>
+
+						</a>
+
+						<!-- DELETE -->
+
+						<!--<a th:href="@{/deleteSubject/{id}(id=${sub.id})}" class="btn btn-danger btn-sm">
+
+							<i class="bi bi-trash"></i>
+
+						</a>-->
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<!-- STATS -->
+
+			<div class="stats-container">
+
+				<div class="stats-card">
+
+					<h2 th:text="${subjects.size()}"></h2>
+
+					<p>Total Subjects</p>
+
+				</div>
+
+				<div class="stats-card">
+
+					<h2>∞</h2>
+
+					<p>Learning Never Stops</p>
+
+				</div>
+
+				<div class="stats-card">
+
+					<h2>24/7</h2>
+
+					<p>Knowledge Growth</p>
+
+				</div>
+
+			</div>
+
+			<!-- FORM -->
+
+			<div class="form-card">
+
+				<h4 class="mb-4">
+					Add / Update Subject
+				</h4>
+
+				<form th:action="@{/saveSubject}" method="post" th:object="${subject}">
+
+					<!-- ID -->
+
+					<input type="hidden" th:field="*{id}">
+
+					<!-- SUBJECT -->
+
+					<div class="mb-3">
+
+						<label class="form-label">
+							Subject Name
+						</label>
+
+						<input type="text" th:field="*{name}" class="form-control" placeholder="Enter Subject Name"
+							required>
+
+					</div>
+
+					<!-- DESCRIPTION -->
+
+					<div class="mb-3">
+
+						<label class="form-label">
+							Description
+						</label>
+
+						<textarea th:field="*{description}" rows="4" class="form-control"
+							placeholder="Enter Subject Description"></textarea>
+
+					</div>
+
+					<!-- BUTTON -->
+
+					<button type="submit" class="btn btn-success btn-sm px-4">
+
+						Save Subject
+
+					</button>
+
+				</form>
+
+			</div>
+
+		</div>
+
+	</div>
+</body>
+
+</html>

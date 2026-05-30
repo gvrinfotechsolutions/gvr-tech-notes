@@ -307,6 +307,82 @@
 				display: none;
 			}
 		}
+
+
+		/* DARK MODE */
+
+		.dark-mode {
+
+			background: #121212 !important;
+
+			color: white !important;
+		}
+
+		/* NAVBAR */
+
+		.dark-mode .top-navbar {
+
+			background: #1e1e1e;
+		}
+
+		/* SIDEBAR */
+
+		.dark-mode .sidebar {
+
+			background: #1e1e1e;
+		}
+
+		/* CARDS */
+
+		.dark-mode .topic-card,
+		.dark-mode .search-card {
+
+			background: #1f1f1f;
+
+			color: white;
+		}
+
+		/* LINKS */
+
+		.dark-mode .topic-link {
+
+			color: white;
+		}
+
+		/* ROW HOVER */
+
+		.dark-mode .topic-row:hover {
+
+			background: #2a2a2a;
+		}
+
+		/* SUBJECT ITEMS */
+
+		.dark-mode .subject-item {
+
+			background: #2a2a2a;
+
+			color: white;
+		}
+
+		/* INPUT */
+
+		.dark-mode input {
+
+			background: #2a2a2a;
+
+			color: white;
+
+			border: 1px solid #444;
+		}
+
+		/* TITLES */
+
+		.dark-mode .section-title,
+		.dark-mode .sidebar-title {
+
+			color: #5fd39a;
+		}
 	</style>
 
 </head>
@@ -335,7 +411,10 @@
 
 	<!-- LEARNING BANNER -->
 
-	<div th:replace="fragments/banner :: learningBanner"></div>
+
+	<div th:replace="~{fragments/banner :: learningBanner}"></div>
+
+
 	<!-- NAVBAR -->
 
 	<div class="top-navbar">
@@ -349,6 +428,14 @@
 		</div>
 
 		<div class="nav-links">
+
+
+			<button id="themeToggle" class="btn btn-dark btn-sm rounded-pill ms-3">
+
+				🌙 Dark
+
+			</button>
+
 
 			<a href="/">
 
@@ -381,20 +468,11 @@
 
 				<i class="bi bi-folder2-open"></i>
 
-				<span th:text="${sub.name}"></span>
+				<span th:text="${sub.name + ' (' + subjectTopicCountMap.get(sub.id) + ')'}">
+				</span>
 
 			</a>
 
-			<!-- ADD TOPIC BUTTON -->
-
-			<a th:href="@{/addTopic(subjectId=${selectedSubjectId})}"
-				class="btn btn-success w-100 mt-3 rounded-pill shadow-sm">
-
-				<i class="bi bi-plus-circle"></i>
-
-				Add Topic
-
-			</a>
 
 		</div>
 
@@ -436,86 +514,144 @@
 
 			</div>
 
+
+
 			<!-- TOPICS -->
 
-			<div th:if="${groupedTopics != null
-		                 and !groupedTopics.isEmpty()}">
+			<div th:if="${groupedTopics != null and !groupedTopics.isEmpty()}">
 
 				<!-- SUBJECT CARD -->
 
-				<div th:each="entry : ${groupedTopics}" class="topic-card">
+				<div th:each="entry : ${groupedTopics}">
 
-					<!-- SUBJECT HEADER -->
 
-					<div class="d-flex
-		                        justify-content-between
-		                        align-items-center
-		                        mb-3">
 
-						<div class="subject-badge fs-6 px-3 py-2">
+					<!-- EMPTY SUBJECT -->
+
+					<div th:if="${entry.value.isEmpty()}" class="topic-card p-4">
+
+						<div class="subject-badge fs-6 px-3 py-2 mb-3">
 
 							<i class="bi bi-folder-fill"></i>
 
-							<span th:text="${entry.key}">
-							</span>
+							<span th:text="${entry.key}"></span>
+
+							<small th:if="${!entry.value.isEmpty()}"
+								th:text="'(' + totalTopicsMap.get(entry.value[0].subject.id) + ')'">
+							</small>
 
 						</div>
 
-						<!-- ADD TOPIC -->
+						<div class="small text-muted mb-3">
 
-						<a th:href="@{/addTopic(subjectId=${selectedSubjectId})}" class="btn btn-success
-						          btn-sm
-						          rounded-pill
-						          px-3">
+							Topics: <strong>0</strong>
+
+							|
+
+							Completed: <strong>0</strong>
+
+							|
+
+							Progress:
+							<span class="fw-bold text-danger">0%</span>
+
+						</div>
+						<p class="text-muted mt-3 mb-3">
+
+							Start building your knowledge base by adding the first topic.
+
+						</p>
+
+						<!-- TEST BUTTON -->
+
+						<a th:href="@{/addTopic(subjectId=${selectedSubjectId})}" class="btn btn-success rounded-pill">
 
 							<i class="bi bi-plus-circle"></i>
 
-							Add Topic
+							Add First Topic
 
 						</a>
 
 					</div>
 
-					<!-- TOPIC LIST -->
+					<!-- SUBJECT WITH TOPICS -->
 
-					<!-- TOPIC LIST -->
+					<div th:if="${!entry.value.isEmpty()}" class="topic-card">
 
-					<div class="topic-list">
+						<!-- SUBJECT HEADER -->
 
-						<div th:each="topic : ${entry.value}" class="topic-row">
+						<div class="small text-muted mt-1">
 
-							<!-- LEFT -->
+							<span>
+								Topics:
+								<strong th:text="${#lists.size(entry.value)}"></strong>
+							</span>
 
-							<div class="topic-left">
+							|
 
-								<a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="topic-link">
+							<span>
+								Completed:
+								<strong th:text="${completedTopicsCountMap.get(entry.value[0].subject.id)}"></strong>
+							</span>
 
-									<i class="bi bi-journal-text"></i>
+						</div>
 
-									<span th:text="${topic.title}">
-									</span>
+						<!-- HEADER ROW -->
 
-								</a>
+						<div class="d-flex justify-content-between align-items-center mb-3">
+
+							<!-- LEFT SIDE -->
+
+							<div class="d-flex align-items-center gap-3">
+
+								<!-- SUBJECT NAME -->
+
+								<div class="subject-badge fs-6 px-3 py-2">
+
+									<i class="bi bi-folder-fill"></i>
+
+									<span th:text="${entry.key}"></span>
+
+								</div>
+
+								<!-- PROGRESS % -->
+
+								<div class="fw-bold text-success fs-4">
+
+									<span
+										th:text="${#numbers.formatDecimal(progressMap.get(entry.value[0].subject.id),0,0)}">
+									</span>%
+
+								</div>
 
 							</div>
 
-							<!-- RIGHT -->
+							<!-- RIGHT SIDE BUTTONS -->
 
-							<div class="topic-actions-buttons">
+							<div class="d-flex align-items-center gap-2">
 
-								<!-- VIEW -->
+								<!-- RESET -->
 
-								<a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn btn-info btn-sm">
+								<a th:href="${selectedSubjectId != null}
+								    ? @{/resetProgress/{id}(
+								            id=${entry.value[0].subject.id},
+								            returnSubjectId=${selectedSubjectId})}
+								    : @{/resetProgress/{id}(
+								            id=${entry.value[0].subject.id})}" class="btn btn-outline-danger btn-sm rounded-pill">
 
-									<i class="bi bi-eye"></i>
+									<i class="bi bi-arrow-repeat"></i>
+									Reset
 
 								</a>
 
-								<!-- EDIT -->
+								<!-- ADD TOPIC -->
 
-								<a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn btn-warning btn-sm">
+								<a th:href="@{/addTopic(subjectId=${entry.value[0].subject.id})}"
+									class="btn btn-success btn-sm rounded-pill px-3">
 
-									<i class="bi bi-pencil"></i>
+									<i class="bi bi-plus-circle"></i>
+
+									Add Topic
 
 								</a>
 
@@ -523,36 +659,141 @@
 
 						</div>
 
-					</div>
+						<!-- PROGRESS BAR -->
 
+						<div class="progress mb-3" style="height:8px; border-radius:10px;">
 
+							<div class="progress-bar" role="progressbar" th:classappend="
+                     ${progressMap.get(entry.value[0].subject.id) < 40}
+                     ? 'bg-danger'
+                     : (${progressMap.get(entry.value[0].subject.id) < 80}
+                     ? 'bg-warning'
+                     : 'bg-success')" th:style="|width:${progressMap.get(entry.value[0].subject.id)}%;|">
 
+							</div>
 
-				</div>
+						</div>
 
+						<!-- TOPIC LIST -->
 
+						<div class="topic-list">
+
+							<div th:each="topic : ${entry.value}" class="topic-row">
+
+								<!-- LEFT -->
+
+								<div class="topic-left">
+
+									<a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="topic-link">
+
+										<i class="bi bi-journal-text"></i>
+
+										<span th:text="${topic.title}"></span>
+
+									</a>
+
+								</div>
+
+								<!-- RIGHT -->
+
+								<div class="topic-actions-buttons">
+
+									<!-- VIEW -->
+
+									<a th:href="@{/viewTopic/{id}(id=${topic.id})}"
+										class="btn btn-info btn-sm rounded-circle" title="View Topic">
+
+										<i class="bi bi-eye"></i>
+
+									</a>
+
+									<!-- EDIT -->
+
+									<a th:href="@{/editTopic/{id}(id=${topic.id})}"
+										class="btn btn-info btn-sm rounded-circle" title="Edit Topic">
+
+										<i class="bi bi-pencil"></i>
+
+									</a>
+
+									<!-- COMPLETED -->
+
+									<span th:if="${completedTopicsMap != null and completedTopicsMap[topic.id]}"
+										class="badge bg-success">
+
+										✓ Completed
+
+									</span>
+
+									<!-- COMPLETE BUTTON -->
+
+									<a th:if="${completedTopicsMap == null or !completedTopicsMap[topic.id]}" th:href="${selectedSubjectId != null}
+									        ? @{/completeTopic/{id}(
+									                id=${topic.id},
+									                subjectId=${selectedSubjectId})}
+									        : @{/completeTopic/{id}(
+									                id=${topic.id})}" class="btn btn-success btn-sm rounded-circle" title="Mark Complete">
+
+										<i class="bi bi-check-lg"></i>
+
+									</a>
+
+								</div>
+
+							</div>
+
+						</div> <!-- topic-list -->
+
+					</div> <!-- topic-card with topics -->
+
+				</div> <!-- th:each -->
 
 			</div>
 
 			<div class="mb-4">
 
-				<a href="/export-pdf" class="btn btn-danger
-			              rounded-pill
-			              px-4
-			              shadow-sm">
 
-					<i class="bi bi-file-earmark-pdf"></i>
-
-					Export Full Backup PDF
-
-				</a>
 
 			</div>
 
+			<div class="d-flex justify-content-end mb-3">
+
+				<form method="get" th:action="${selectedSubjectId != null}
+				      ? @{/subjectTopics/{id}(id=${selectedSubjectId})}
+				      : @{/all-topics}">
+
+					<input type="hidden" name="page" value="0" />
+
+					<label class="me-2 fw-bold">
+						Topics Per Page:
+					</label>
+
+					<select name="size" class="form-select d-inline-block w-auto" onchange="this.form.submit()">
+
+						<option value="10" th:selected="${selectedSize == 10}">
+							10
+						</option>
+
+						<option value="20" th:selected="${selectedSize == 20}">
+							20
+						</option>
+
+						<option value="50" th:selected="${selectedSize == 50}">
+							50
+						</option>
+
+					</select>
+
+				</form>
+
+			</div>
 
 			<!-- PAGINATION -->
 
-			<div th:if="${currentPage != null}" class="d-flex justify-content-center mt-5 mb-3">
+
+			<!-- SUBJECT TOPICS PAGINATION -->
+
+			<div  th:if="${selectedSubjectId != null and currentPage != null}" class="d-flex justify-content-center mt-5 mb-3">
 
 				<nav>
 
@@ -562,9 +803,11 @@
 
 						<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
 
-							<a class="page-link" th:href="${selectedSubjectId != null} ?
-			                   @{/subjectTopics/{id}(id=${selectedSubjectId}, page=${currentPage > 0 ? currentPage - 1 : 0})} :
-			                   @{/topics(page=${currentPage - 1})}">
+							<a class="page-link" th:href="@{/subjectTopics/{id}(
+			                        id=${selectedSubjectId},
+			                        page=${currentPage - 1},
+			                        size=${selectedSize}
+			                   )}">
 
 								Previous
 
@@ -577,20 +820,83 @@
 						<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
 							th:classappend="${currentPage == i} ? 'active'">
 
-							<a class="page-link" th:href="${selectedSubjectId != null} ?
-			                   @{/subjectTopics/{id}(id=${selectedSubjectId}, page=${i})} :
-			                   @{/topics(page=${i})}" th:text="${i + 1}">
+							<a class="page-link" th:href="@{/subjectTopics/{id}(
+			                        id=${selectedSubjectId},
+			                        page=${i},
+			                        size=${selectedSize}
+			                   )}" th:text="${i + 1}">
+
 							</a>
 
 						</li>
 
 						<!-- NEXT -->
 
-						<li class="page-item" th:classappend="${currentPage + 1 == totalPages} ? 'disabled'">
+						<li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
 
-							<a class="page-link" th:href="${selectedSubjectId != null} ?
-			                   @{/subjectTopics/{id}(id=${selectedSubjectId}, page=${currentPage + 1})} :
-			                   @{/topics(page=${currentPage + 1})}">
+							<a class="page-link" th:href="@{/subjectTopics/{id}(
+			                        id=${selectedSubjectId},
+			                        page=${currentPage + 1},
+			                        size=${selectedSize}
+			                   )}">
+
+								Next
+
+							</a>
+
+						</li>
+
+					</ul>
+
+				</nav>
+
+			
+
+			<!-- ALL TOPICS PAGINATION -->
+
+			<div th:if="${selectedSubjectId == null and currentPage != null}" class="d-flex justify-content-center mt-5 mb-3">
+
+				<nav>
+
+					<ul class="pagination shadow-sm">
+
+						<!-- PREVIOUS -->
+
+						<li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+
+							<a class="page-link" th:href="@{/all-topics(
+			                        page=${currentPage - 1},
+			                        size=${selectedSize}
+			                   )}">
+
+								Previous
+
+							</a>
+
+						</li>
+
+						<!-- PAGE NUMBERS -->
+
+						<li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+							th:classappend="${currentPage == i} ? 'active'">
+
+							<a class="page-link" th:href="@{/all-topics(
+			                        page=${i},
+			                        size=${selectedSize}
+			                   )}" th:text="${i + 1}">
+
+							</a>
+
+						</li>
+
+						<!-- NEXT -->
+
+						<li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+
+							<a class="page-link" th:href="@{/all-topics(
+			                        page=${currentPage + 1},
+			                        size=${selectedSize}
+			                   )}">
 
 								Next
 
@@ -636,6 +942,32 @@
 
 			</div>
 		</div>
+		<script>
+
+			const toggleBtn =
+				document.getElementById("themeToggle");
+
+			toggleBtn.addEventListener("click", () => {
+
+				document.body.classList.toggle("dark-mode");
+
+				// SAVE USER CHOICE
+
+				localStorage.setItem(
+					"darkMode",
+					document.body.classList.contains("dark-mode")
+				);
+			});
+
+			// LOAD SAVED MODE
+
+			if (localStorage.getItem("darkMode") === "true") {
+
+				document.body.classList.add("dark-mode");
+			}
+
+		</script>
+
 
 
 </body>

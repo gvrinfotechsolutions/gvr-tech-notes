@@ -15,23 +15,57 @@ import org.springframework.stereotype.Service;
 import com.gvr.notes.model.Topic;
 import com.gvr.notes.repository.TopicRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TopicService {
 
 	private final TopicRepository topicRepository;
 
-	public TopicService(TopicRepository topicRepository) {
+	private final SolrService solrService;
+
+	public TopicService(TopicRepository topicRepository, SolrService solrService) {
+
 		this.topicRepository = topicRepository;
+		this.solrService = solrService;
 	}
 
 	// SAVE TOPIC
 
 	public Topic saveTopic(Topic topic) {
-		return topicRepository.save(topic);
+
+		log.info("Saving topic. title={}", topic.getTitle());
+
+		Topic savedTopic = topicRepository.save(topic);
+
+		log.info("Topic saved successfully. id={}, title={}", savedTopic.getId(), savedTopic.getTitle());
+
+		try {
+
+			log.info("Indexing topic in Solr. topicId={}", savedTopic.getId());
+
+			solrService.indexTopic(savedTopic);
+
+			log.info("Solr indexing completed successfully. topicId={}", savedTopic.getId());
+
+		} catch (Exception e) {
+
+			log.error("Failed to index topic in Solr. topicId={}", savedTopic.getId(), e);
+		}
+
+		return savedTopic;
 	}
 
 	public List<Topic> getAllTopics() {
-		return topicRepository.findAll();
+
+		log.info("Fetching all topics");
+
+		List<Topic> topics = topicRepository.findAll();
+
+		log.info("Fetched {} topics", topics.size());
+
+		return topics;
 	}
 
 	// DELETE TOPIC
@@ -43,30 +77,93 @@ public class TopicService {
 	// GET TOPIC BY ID
 
 	public Topic getTopicById(Long id) {
-		return topicRepository.findById(id).orElse(null);
+
+		log.debug("Fetching topic. topicId={}", id);
+
+		Topic topic = topicRepository.findById(id).orElse(null);
+
+		if (topic == null) {
+
+			log.warn("Topic not found. topicId={}", id);
+
+		} else {
+
+			log.debug("Topic found. title={}", topic.getTitle());
+		}
+
+		return topic;
 	}
 
 	// SEARCH TOPICS
-	public List<Topic> searchTopics(String keyword) {
+	/*
+	 * public List<Topic> searchTopics(String keyword) {
+	 * 
+	 * try {
+	 * 
+	 * List<Long> topicIds = solrService.searchTopicIds(keyword);
+	 * 
+	 * System.out.println("Topic IDs = " + topicIds);
+	 * 
+	 * List<Topic> topics = topicRepository.findAllById(topicIds);
+	 * 
+	 * System.out.println("Topics Size = " + topics.size());
+	 * 
+	 * return topics;
+	 * 
+	 * } catch (Exception e) {
+	 * 
+	 * e.printStackTrace();
+	 * 
+	 * return new ArrayList<>(); } }
+	 */
 
-		return topicRepository.findByTitleContainingIgnoreCase(keyword);
+	public Page<Topic> searchTopics(String keyword, Pageable pageable) {
+
+		log.info("Searching topics. keyword={}", keyword);
+
+		Page<Topic> topics = topicRepository.findByTitleContainingIgnoreCaseOrTagsContainingIgnoreCase(keyword, keyword,
+				pageable);
+
+		log.info("Search completed. results={}", topics.getTotalElements());
+
+		return topics;
 	}
 
 	public List<Topic> filterByTag(String tag) {
 
-		return topicRepository.findByTagsContainingIgnoreCase(tag);
+		log.info("Filtering topics by tag={}", tag);
+
+		List<Topic> topics = topicRepository.findByTagsContainingIgnoreCase(tag);
+
+		log.info("Found {} topics for tag={}", topics.size(), tag);
+
+		return topics;
 	}
 
 	public Page<Topic> getTopicsBySubject(Long id, int page, int size) {
 
+		log.info("Fetching topics by subject. subjectId={}, page={}, size={}", id, page, size);
+
 		Pageable pageable = PageRequest.of(page, size);
 
-		return topicRepository.findBySubjectId(id, pageable);
+		Page<Topic> topics = topicRepository.findBySubjectId(id, pageable);
+
+		log.info("Fetched {} topics for subjectId={}", topics.getNumberOfElements(), id);
+
+		return topics;
 	}
 
 	public Page<Topic> getAllTopics(Pageable pageable) {
 
-		return topicRepository.findAll(pageable);
+	    log.info("Fetching paginated topics");
+
+	    Page<Topic> topics =
+	            topicRepository.findAll(pageable);
+
+	    log.info("Fetched {} topics",
+	            topics.getNumberOfElements());
+
+	    return topics;
 	}
 
 	public Map<String, Object> getGroupedTopics(
@@ -78,6 +175,13 @@ public class TopicService {
 			String sortBy,
 
 			String direction) {
+		
+		log.info(
+			    "Fetching grouped topics. page={}, size={}, sortBy={}, direction={}",
+			    page,
+			    size,
+			    sortBy,
+			    direction);
 
 		Sort sort = direction.equalsIgnoreCase("asc")
 
@@ -110,6 +214,11 @@ public class TopicService {
 
 		response.put("totalItems", topicPage.getTotalElements());
 
+		log.info(
+			    "Grouped topics loaded successfully. subjects={}, totalItems={}",
+			    groupedTopics.size(),
+			    topicPage.getTotalElements());
 		return response;
 	}
+
 }

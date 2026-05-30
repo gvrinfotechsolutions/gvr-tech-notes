@@ -21,6 +21,12 @@ public interface TopicRepository
     
     Page<Topic> findAllByOrderBySubject_NameAscTitleAsc(Pageable pageable);
     
+    long countBySubjectId(Long subjectId);
     
+        
+    Page<Topic> findByTitleContainingIgnoreCaseOrTagsContainingIgnoreCase(
+            String title,
+            String tags,
+            Pageable pageable);
 
 }

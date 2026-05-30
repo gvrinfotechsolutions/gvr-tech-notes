@@ -291,7 +291,22 @@
 
 		<div class="search-box">
 
-			<input type="text" class="form-control" placeholder="Search your knowledge...">
+			<form action="/searchTopics" method="get">
+
+				<div class="input-group">
+
+					<input type="text" name="keyword" class="form-control"
+						placeholder="Search topics, notes, keywords..." required>
+
+					<button type="submit" class="btn btn-success">
+
+						<i class="bi bi-search"></i>
+
+					</button>
+
+				</div>
+
+			</form>
 
 		</div>
 
@@ -335,7 +350,8 @@
 
 				<i class="bi bi-folder2-open"></i>
 
-				<span th:text="${sub.name}"></span>
+				<span th:text="${sub.name + ' (' + subjectTopicCountMap.get(sub.id) + ')'}">
+				</span>
 
 			</a>
 

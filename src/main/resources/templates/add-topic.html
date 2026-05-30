@@ -97,7 +97,9 @@
 							Select Subject
 						</option>
 
-						<option th:each="sub : ${subjects}" th:value="${sub.id}" th:text="${sub.name}">
+						<option th:each="sub : ${subjects}"
+						        th:value="${sub.id}"
+						        th:text="${sub.name + ' (' + subjectTopicCountMap.get(sub.id) + ')'}">
 						</option>
 
 					</select>

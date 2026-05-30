@@ -95,8 +95,8 @@
 
 	<!-- LEARNING BANNER -->
 
-		<div th:replace="fragments/banner :: learningBanner"></div>
-		
+	<div th:replace="fragments/banner :: learningBanner"></div>
+
 	<div class="container dashboard-container">
 
 		<h2 class="dashboard-title">
@@ -108,20 +108,19 @@
 		<div class="feature-grid">
 			<!-- PENDING USERS -->
 
-			<a href="/admin/pending-users"
-			   class="feature-card">
+			<a href="/admin/pending-users" class="feature-card">
 
-			    <div class="feature-icon">
+				<div class="feature-icon">
 
-			        <i class="bi bi-person-check"></i>
+					<i class="bi bi-person-check"></i>
 
-			    </div>
+				</div>
 
-			    <div class="feature-title">
+				<div class="feature-title">
 
-			        Pending User Requests
+					Pending User Requests
 
-			    </div>
+				</div>
 
 			</a>
 
@@ -178,6 +177,24 @@
 				</div>
 
 			</a>
+			
+			<!-- EXPORT BACKUP PDF -->
+
+			<a th:href="@{/export/full-pdf}" class="feature-card">
+
+			    <div class="feature-icon">
+
+			        <i class="bi bi-file-earmark-pdf"></i>
+
+			    </div>
+
+			    <div class="feature-title">
+
+			        Export Full Backup PDF
+
+			    </div>
+
+			</a>
 
 			<!-- SEARCH -->
 
@@ -198,6 +215,8 @@
 			</a>
 
 		</div>
+
+		
 
 	</div>
 

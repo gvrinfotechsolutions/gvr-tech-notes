@@ -63,7 +63,7 @@
 <body>
 	<!-- LEARNING BANNER -->
 
-		<div th:replace="fragments/banner :: learningBanner"></div>
+	<div th:replace="fragments/banner :: learningBanner"></div>
 	<div class="container">
 
 		<div class="container-box">
@@ -78,7 +78,15 @@
 		            justify-content-between
 		            align-items-center">
 
-				<span th:text="${sub.name}"></span>
+				<div>
+
+					<div class="fw-bold" th:text="${sub.name}">
+					</div>
+
+					<small class="badge bg-success" th:text="${subjectTopicCountMap.get(sub.id) + ' Topics'}">
+					</small>
+
+				</div>
 
 				<a th:href="@{/subjectTopics/{id}(id=${sub.id})}" class="btn btn-success btn-sm rounded-pill">
 

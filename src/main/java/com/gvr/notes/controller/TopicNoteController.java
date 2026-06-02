@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @Controller
 @RequiredArgsConstructor
@@ -65,7 +66,7 @@ public class TopicNoteController {
 	    log.info("Loading Notes Revision Page. Page={}", page);
 
 	    Page<TopicNote> notesPage =
-	            topicNoteService.getAllNotes(PageRequest.of(page, 20));
+	            topicNoteService.getAllNotes(PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "updatedDate")));
 
 	    model.addAttribute("notesPage", notesPage);
 

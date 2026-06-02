@@ -1,36 +1,58 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <body>
-
 <div th:fragment="learningBanner">
-
-    <!-- Learning Marquee -->
-    <div class="alert alert-info
-                text-center
-                fw-bold
-                shadow-sm
-                mb-3">
-
-        <marquee behavior="scroll" direction="left">
-
-            🚀 Continuously Acquire Knowledge and Keep Learning |
-            ☕ Practice Daily |
-            🔥 Consistency Beats Talent |
-            💻 Build Real Projects |
-            📚 If you stop learning means its a dead end for you |
-            🎯 One Step Every Day |
-            🚀 Its a continuous process
-
-        </marquee>
-
+    <div class="learning-banner">
+        <div class="banner-track">
+            <span>🚀 Continuously Acquire Knowledge and Keep Learning</span>
+            <span class="sep">|</span>
+            <span>☕ Practice Daily — Consistency Beats Talent</span>
+            <span class="sep">|</span>
+            <span>💻 Build Real Projects</span>
+            <span class="sep">|</span>
+            <span>📚 If you stop learning, it's a dead end</span>
+            <span class="sep">|</span>
+            <span>🎯 One Step Every Day</span>
+            <span class="sep">|</span>
+            <span>🔥 It's a Continuous Process</span>
+            <span class="sep">|</span>
+            <!-- duplicate for seamless loop -->
+            <span>🚀 Continuously Acquire Knowledge and Keep Learning</span>
+            <span class="sep">|</span>
+            <span>☕ Practice Daily — Consistency Beats Talent</span>
+            <span class="sep">|</span>
+            <span>💻 Build Real Projects</span>
+            <span class="sep">|</span>
+            <span>📚 If you stop learning, it's a dead end</span>
+            <span class="sep">|</span>
+            <span>🎯 One Step Every Day</span>
+            <span class="sep">|</span>
+            <span>🔥 It's a Continuous Process</span>
+            <span class="sep">|</span>
+        </div>
     </div>
-
-
-    
-
+    <style>
+        .learning-banner {
+            background: linear-gradient(90deg, #0e7a5f, #16a37f, #0e7a5f);
+            color: #fff;
+            padding: 7px 0;
+            overflow: hidden;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .banner-track {
+            display: inline-flex;
+            gap: 18px;
+            white-space: nowrap;
+            animation: marquee-scroll 40s linear infinite;
+        }
+        .banner-track .sep { opacity: 0.5; }
+        @keyframes marquee-scroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+    </style>
 </div>
-
 </body>
-
 </html>

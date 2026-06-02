@@ -1,103 +1,151 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Add Topic - GVR_T_Notes</title>
+    <title>Add Topic — GVR_T_Notes</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { background: #f4f7fb; font-family: Arial, sans-serif; }
-        .form-container {
-            max-width: 800px; margin: 40px auto; background: white;
-            padding: 35px; border-radius: 16px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+        :root {
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
+            --text: #1e2330; --text-muted: #6b7280;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --radius: 14px; --radius-sm: 10px;
         }
-        .page-title { color: #2d9d78; font-weight: 700; margin-bottom: 25px; }
-        .form-control, .form-select { border-radius: 10px; }
-        .markdown-hint {
-            font-size: 12px; color: #6c757d; margin-top: 6px;
-            background: #f8f9fa; padding: 8px 12px; border-radius: 8px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
+
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+        .topbar-logo { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .topbar-nav { display: flex; align-items: center; gap: 4px; }
+        .topbar-nav a { text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: var(--radius-sm); transition: all 0.15s; }
+        .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .btn-logout { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: var(--radius-sm); border: 1.5px solid #fca5a5; color: #ef4444; background: #fff5f5; cursor: pointer; transition: all 0.15s; }
+        .btn-logout:hover { background: #fee2e2; }
+
+        .page-wrap { max-width: 820px; margin: 32px auto; padding: 0 20px 60px; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); margin-bottom: 22px; transition: all 0.15s; }
+        .back-link:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+        .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 32px 28px; }
+
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .card-icon { width: 44px; height: 44px; background: var(--primary-light); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .card-title { font-size: 22px; font-weight: 800; }
+        .card-subtitle { font-size: 13px; color: var(--text-muted); }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 7px; }
+        label .optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+        input[type="text"], select, textarea {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm); font-size: 14px; font-family: 'Inter', sans-serif;
+            color: var(--text); outline: none; transition: border-color 0.15s; background: var(--surface);
         }
-        .markdown-hint code { background: #e9ecef; padding: 1px 5px; border-radius: 4px; color: #d63384; }
+        input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        textarea { resize: vertical; line-height: 1.7; }
+
+        .hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--primary-light); }
+        .hint code { font-family: 'JetBrains Mono', monospace; background: #e9ecef; padding: 1px 5px; border-radius: 4px; color: #7c3aed; font-size: 11px; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--primary); color: #fff; padding: 11px 22px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 7px; background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); padding: 11px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; text-decoration: none; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+        .btn-secondary:hover { background: var(--bg); color: var(--text); }
+
+        @media (max-width: 640px) {
+            .topbar-nav { display: none; }
+            .topbar { padding: 0 14px; }
+            .page-wrap { padding: 0 14px 48px; margin-top: 20px; }
+            .card { padding: 22px 16px; }
+            .form-actions { flex-direction: column; }
+            .btn-primary, .btn-secondary { justify-content: center; }
+        }
     </style>
 </head>
 <body>
 
-    <div th:replace="fragments/banner :: learningBanner"></div>
+<header class="topbar">
+    <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    <nav class="topbar-nav">
+        <a href="/"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/admin"><i class="bi bi-speedometer2"></i> Admin</a>
+    </nav>
+    <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </form>
+</header>
 
-    <div class="container">
-        <div class="form-container">
+<div th:replace="fragments/banner :: learningBanner"></div>
 
-            <h2 class="page-title">
-                <i class="bi bi-plus-circle"></i> Add New Topic
-            </h2>
+<div class="page-wrap">
 
-            <form th:action="@{/saveTopic}" th:object="${topic}" method="post">
+    <a href="/topics" class="back-link"><i class="bi bi-arrow-left"></i> Back to Topics</a>
 
-                <!-- SUBJECT -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Subject</label>
-                    <select th:field="*{subject.id}" class="form-select" required>
-                        <option value="">-- Select Subject --</option>
-                        <option th:each="sub : ${subjects}"
-                                th:value="${sub.id}"
-                                th:text="${sub.name + ' (' + subjectTopicCountMap.get(sub.id) + ')'}">
-                        </option>
-                    </select>
-                </div>
-
-                <!-- TITLE -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Topic Title</label>
-                    <input type="text" th:field="*{title}" class="form-control"
-                           placeholder="e.g. Java 8 Streams" required>
-                </div>
-
-                <!-- TAGS -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Tags</label>
-                    <input type="text" th:field="*{tags}" class="form-control"
-                           placeholder="Java, Streams, Lambda">
-                    <div class="markdown-hint">Comma-separated tags for filtering.</div>
-                </div>
-
-                <!-- CONTENT -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Content (Markdown)</label>
-                    <textarea th:field="*{content}" id="topicContent" rows="18"
-                              class="form-control" required
-                              placeholder="Paste Claude's markdown content here..."></textarea>
-                    <div class="markdown-hint">
-                        Supports Markdown: <code>**bold**</code>, <code>## heading</code>,
-                        <code>```java code```</code>, <code>| tables |</code>, bullet lists and more.
-                    </div>
-                </div>
-
-                <!-- CODE SNIPPET -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">
-                        Code Snippet <span class="text-muted fw-normal">(optional — for highlighted Java code block)</span>
-                    </label>
-                    <textarea th:field="*{codeSnippet}" rows="8" class="form-control"
-                              placeholder="public class Example { ... }"></textarea>
-                </div>
-
-                <!-- BUTTONS -->
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success px-4">
-                        <i class="bi bi-check-circle"></i> Save Topic
-                    </button>
-                    <a href="/topics" class="btn btn-secondary">Cancel</a>
-                </div>
-
-            </form>
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon"><i class="bi bi-plus-circle"></i></div>
+            <div>
+                <div class="card-title">Add New Topic</div>
+                <div class="card-subtitle">Create a new knowledge article with markdown content</div>
+            </div>
         </div>
-    </div>
 
-    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
-    <script>
-        CKEDITOR.replace('topicContent', { height: 500 });
-    </script>
+        <form th:action="@{/saveTopic}" th:object="${topic}" method="post">
+
+            <div class="form-group">
+                <label>Subject</label>
+                <select th:field="*{subject.id}" required>
+                    <option value="">— Select a subject —</option>
+                    <option th:each="sub : ${subjects}"
+                            th:value="${sub.id}"
+                            th:text="${sub.name + ' (' + subjectTopicCountMap.get(sub.id) + ' topics)'}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Topic Title</label>
+                <input type="text" th:field="*{title}" placeholder="e.g. Java 8 Streams, Spring Security Basics" required>
+            </div>
+
+            <div class="form-group">
+                <label>Tags <span class="optional">(optional)</span></label>
+                <input type="text" th:field="*{tags}" placeholder="Java, Streams, Lambda">
+                <div class="hint">Comma-separated tags for filtering — e.g. <code>Spring, REST, API</code></div>
+            </div>
+
+            <div class="form-group">
+                <label>Content (Markdown)</label>
+                <textarea th:field="*{content}" id="topicContent" rows="20" required
+                          placeholder="Paste or write markdown content here..."></textarea>
+                <div class="hint">
+                    Supports: <code>**bold**</code> <code>## Heading</code>
+                    <code>```java code```</code> <code>| table |</code> bullet lists, blockquotes &amp; more.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Code Snippet <span class="optional">(optional — highlighted Java block)</span></label>
+                <textarea th:field="*{codeSnippet}" rows="8"
+                          placeholder="public class Example { ... }"></textarea>
+                <div class="hint">Plain Java code — no markdown needed. It is syntax-highlighted automatically on the view page.</div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary"><i class="bi bi-check-circle"></i> Save Topic</button>
+                <a href="/topics" class="btn-secondary"><i class="bi bi-x"></i> Cancel</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
 </body>
 </html>

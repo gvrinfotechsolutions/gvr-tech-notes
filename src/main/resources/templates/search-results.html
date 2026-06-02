@@ -1,347 +1,170 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-	<title>Search Results</title>
+    <title>Search Results — GVR_T_Notes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
+            --text: #1e2330; --text-muted: #6b7280;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --radius: 14px; --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
 
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+        .topbar-logo { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+        .topbar-nav { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .topbar-nav a { text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: var(--radius-sm); transition: all 0.15s; }
+        .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .btn-logout { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: var(--radius-sm); border: 1.5px solid #fca5a5; color: #ef4444; background: #fff5f5; cursor: pointer; }
+        .btn-logout:hover { background: #fee2e2; }
 
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        .page-wrap { max-width: 860px; margin: 32px auto; padding: 0 20px 60px; }
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        /* SEARCH BAR */
+        .search-box { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 20px 22px; margin-bottom: 24px; }
+        .search-box form { display: flex; gap: 10px; }
+        .search-box input { flex: 1; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; color: var(--text); }
+        .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+        .search-box button { padding: 11px 20px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .search-box button:hover { background: var(--primary-dark); }
 
-	<style>
-		body {
-			background: #f5f7fa;
-			font-family: 'Segoe UI', sans-serif;
-		}
+        /* HEADER */
+        .results-header { margin-bottom: 22px; }
+        .results-title { font-size: 22px; font-weight: 800; color: var(--text); }
+        .results-meta { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+        .results-meta strong { color: var(--primary); }
+        .keyword-chip { display: inline-block; background: #eff6ff; color: #2563eb; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-size: 13px; border: 1px solid #bfdbfe; }
 
-		.header-card {
-			background: white;
-			border-radius: 15px;
-			padding: 30px;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
-			margin-bottom: 25px;
-		}
+        /* RESULT CARDS */
+        .result-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); margin-bottom: 14px; overflow: hidden; border-left: 4px solid var(--primary); transition: all 0.18s; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .result-card-body { padding: 20px 22px; }
+        .result-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        .subject-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+        .result-type { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .result-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+        .result-preview { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; }
+        .result-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .tag { display: inline-block; background: #f0fdf4; color: #166534; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 12px; border: 1px solid #bbf7d0; }
+        .result-footer { display: flex; align-items: center; justify-content: flex-end; }
+        .btn-view { display: inline-flex; align-items: center; gap: 6px; background: var(--primary); color: #fff; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.15s; }
+        .btn-view:hover { background: var(--primary-dark); }
 
-		.header-title {
-			font-size: 32px;
-			font-weight: 700;
-			color: #1f2937;
-		}
+        /* EMPTY */
+        .empty { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 56px 24px; text-align: center; }
+        .empty-icon { font-size: 48px; color: var(--text-muted); opacity: 0.3; margin-bottom: 16px; }
+        .empty-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .empty-desc { font-size: 14px; color: var(--text-muted); }
 
-		.search-keyword {
-			color: #2563eb;
-			font-weight: 600;
-		}
+        /* PAGINATION */
+        .pagination { display: flex; justify-content: center; gap: 6px; margin-top: 32px; flex-wrap: wrap; }
+        .page-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; text-decoration: none; color: var(--text-muted); background: var(--surface); border: 1.5px solid var(--border); transition: all 0.15s; }
+        .page-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .page-btn.disabled { opacity: 0.4; pointer-events: none; }
 
-		.stats-box {
-			display: flex;
-			gap: 15px;
-			margin-top: 20px;
-			flex-wrap: wrap;
-		}
+        .back-row { text-align: center; margin-top: 28px; }
+        .btn-back { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); transition: all 0.15s; }
+        .btn-back:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
 
-		.stat-item {
-			background: #f8fafc;
-			border: 1px solid #e5e7eb;
-			padding: 10px 15px;
-			border-radius: 10px;
-			font-size: 14px;
-		}
-
-		.search-bar {
-		    background:white;
-		    padding:25px;
-		    border-radius:18px;
-		    box-shadow:0 4px 15px rgba(0,0,0,.06);
-		}
-
-		.topic-card {
-		    border: none;
-		    border-radius: 18px;
-		    box-shadow: 0 4px 15px rgba(0,0,0,.06);
-		    overflow: hidden;
-		    background: white;
-		}
-
-		.topic-card:hover {
-			transform: translateY(-3px);
-			box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
-		}
-
-		.topic-title {
-			font-size: 26px;
-			font-weight: 600;
-			color: #1f2937;
-		}
-
-		.topic-content {
-			color: #64748b;
-			line-height: 1.8;
-			margin-top: 15px;
-		}
-
-		.subject-badge {
-			font-size: 13px;
-			padding: 8px 14px;
-			border-radius: 20px;
-		}
-
-		.topic-footer {
-			border-top: 1px solid #e5e7eb;
-			margin-top: 20px;
-			padding-top: 15px;
-		}
-
-		.pagination .page-link {
-			border-radius: 8px;
-			margin: 0 3px;
-		}
-
-		.footer {
-			margin-top: 50px;
-			text-align: center;
-			color: #94a3b8;
-		}
-
-		.empty-box {
-			background: white;
-			padding: 50px;
-			border-radius: 15px;
-			text-align: center;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
-		}
-	</style>
-
+        @media (max-width: 640px) {
+            .topbar-nav { display: none; }
+            .topbar { padding: 0 14px; }
+            .page-wrap { padding: 0 14px 48px; margin-top: 20px; }
+            .search-box form { flex-direction: column; }
+            .result-meta { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
 </head>
-
 <body>
 
-	<div class="container py-5">
-
-		<!-- HEADER -->
-
-		<div class="header-card">
-
-			<h1 class="header-title">
-				<i class="fa-solid fa-magnifying-glass"></i>
-				Search Results
-			</h1>
-
-			<p class="mt-2 text-muted">
-
-			    Found
-
-			    <strong th:text="${totalResults}">0</strong>
-
-			    result(s) for
-
-			    "<span class="search-keyword"
-			           th:text="${keyword}">
-			    </span>"
-
-			</p>
-
-			<div class="stats-box">
-
-				<div class="stat-item">
-					📚 Topics:
-					<strong th:text="${topics.size()}"></strong>
-				</div>
-
-				<div class="stat-item">
-					🔍 Search:
-					<strong th:text="${keyword}"></strong>
-				</div>
-
-			</div>
-
-		</div>
-
-		<!-- SEARCH BAR -->
-
-		<div class="search-bar">
-
-			<form action="/searchTopics" method="get">
-
-				<div class="input-group">
-
-					<input type="text" name="keyword" class="form-control"
-						placeholder="Search topics, notes, keywords...">
-
-					<button class="btn btn-primary">
-
-						<i class="fa-solid fa-search"></i>
-
-					</button>
-
-				</div>
-
-			</form>
-
-		</div>
-
-		<!-- NO RESULTS -->
-
-		<div th:if="${#lists.isEmpty(topics)}">
-
-			<div class="empty-box">
-
-				<h3>No Topics Found</h3>
-
-				<p class="text-muted">
-					Try another keyword.
-				</p>
-
-			</div>
-
-		</div>
-
-		<!-- RESULTS -->
-
-		<div th:each="topic : ${topics}" class="card topic-card mb-4">
-
-			<div class="card-body">
-
-				<div class="d-flex justify-content-between align-items-center">
-
-					<span class="badge bg-success subject-badge" th:text="${topic.subject.name}">
-					</span>
-
-					<small class="text-muted">
-
-						<i class="fa-solid fa-book"></i>
-
-						Knowledge Article
-
-					</small>
-
-				</div>
-
-				<h3 class="topic-title mt-3"
-				    th:text="${topic.title}">
-				</h3>
-
-				<div class="topic-content">
-
-				    <span th:text="${#strings.length(topic.content) > 180 ?
-				          #strings.substring(topic.content,0,180) + '...' :
-				          topic.content}">
-				    </span>
-
-				</div>
-
-				<!-- TAGS -->
-
-				<div class="mt-2" th:if="${topic.tags != null and !#strings.isEmpty(topic.tags)}">
-
-					<span class="badge bg-light text-dark border me-1"
-						th:each="tag : ${#strings.arraySplit(topic.tags, ',')}" th:text="${#strings.trim(tag)}">
-					</span>
-
-				</div>
-
-				<div class="topic-footer">
-
-					<a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn btn-primary btn-sm">
-
-						<i class="fa-solid fa-eye"></i>
-						View Topic
-
-					</a>
-
-				</div>
-
-			</div>
-
-		</div>
-
-	</div>
-
-	<!-- PAGINATION -->
-
-
-	<div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-5">
-
-		<nav>
-
-			<ul class="pagination shadow-sm">
-
-				<!-- PREVIOUS -->
-
-				<li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
-
-					<a class="page-link" th:href="@{/searchTopics(
-	                                keyword=${keyword},
-	                                page=${currentPage-1},
-	                                size=${size})}">
-
-						Previous
-
-					</a>
-
-				</li>
-
-				<!-- PAGE NUMBERS -->
-
-				<li class="page-item" th:each="i : ${#numbers.sequence(0,totalPages-1)}"
-					th:classappend="${i == currentPage ? 'active' : ''}">
-
-					<a class="page-link" th:text="${i+1}" th:href="@{/searchTopics(
-	                                keyword=${keyword},
-	                                page=${i},
-	                                size=${size})}">
-					</a>
-
-				</li>
-
-				<!-- NEXT -->
-
-				<li class="page-item" th:classappend="${currentPage == totalPages-1 ? 'disabled' : ''}">
-
-					<a class="page-link" th:href="@{/searchTopics(
-	                                keyword=${keyword},
-	                                page=${currentPage+1},
-	                                size=${size})}">
-
-						Next
-
-					</a>
-
-				</li>
-
-			</ul>
-
-		</nav>
-
-	</div>
-	<!-- BACK BUTTON -->
-
-	<div class="text-center mt-4">
-
-		<a href="/topics" class="btn btn-secondary">
-
-			← Back To Topics
-
-		</a>
-
-	</div>
-
-	<!-- FOOTER -->
-
-	<div class="footer">
-		<hr>
-
-		<p>
-			GVR Tech Notes • Knowledge Management System
-		</p>
-
-	</div>
-
-	</div>
-
+<header class="topbar">
+    <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    <nav class="topbar-nav">
+        <a href="/"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+    </nav>
+    <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </form>
+</header>
+
+<div th:replace="fragments/banner :: learningBanner"></div>
+
+<div class="page-wrap">
+
+    <!-- SEARCH BAR -->
+    <div class="search-box">
+        <form action="/searchTopics" method="get">
+            <input type="text" name="keyword" th:value="${keyword}" placeholder="Search topics, tags, keywords..." required>
+            <button type="submit"><i class="bi bi-search"></i> Search</button>
+        </form>
+    </div>
+
+    <!-- HEADER -->
+    <div class="results-header">
+        <h1 class="results-title"><i class="bi bi-search" style="color:var(--primary)"></i> Search Results</h1>
+        <p class="results-meta">
+            Found <strong th:text="${totalResults}">0</strong> result(s) for
+            <span class="keyword-chip" th:text="${keyword}"></span>
+        </p>
+    </div>
+
+    <!-- NO RESULTS -->
+    <div th:if="${#lists.isEmpty(topics)}" class="empty">
+        <div class="empty-icon"><i class="bi bi-file-earmark-x"></i></div>
+        <div class="empty-title">No Topics Found</div>
+        <p class="empty-desc">Try a different keyword or browse all topics.</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div th:each="topic : ${topics}" class="result-card">
+        <div class="result-card-body">
+            <div class="result-meta">
+                <span class="subject-badge"><i class="bi bi-folder2-open"></i> <span th:text="${topic.subject.name}"></span></span>
+                <span class="result-type"><i class="bi bi-journal-text"></i> Knowledge Article</span>
+            </div>
+            <div class="result-title" th:text="${topic.title}"></div>
+            <div class="result-preview" th:text="${#strings.length(topic.content) > 200 ? #strings.substring(topic.content,0,200) + '…' : topic.content}"></div>
+            <div class="result-tags" th:if="${topic.tags != null and !#strings.isEmpty(topic.tags)}">
+                <span class="tag" th:each="tag : ${#strings.arraySplit(topic.tags, ',')}" th:text="${#strings.trim(tag)}"></span>
+            </div>
+            <div class="result-footer">
+                <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-view">
+                    <i class="bi bi-arrow-right-circle"></i> View Topic
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <nav th:if="${totalPages > 1}" class="pagination">
+        <a class="page-btn" th:classappend="${currentPage == 0} ? 'disabled'"
+           th:href="@{/searchTopics(keyword=${keyword},page=${currentPage-1},size=${size})}">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <a class="page-btn"
+           th:each="i : ${#numbers.sequence(0, totalPages-1)}"
+           th:classappend="${i == currentPage} ? 'active'"
+           th:href="@{/searchTopics(keyword=${keyword},page=${i},size=${size})}"
+           th:text="${i+1}"></a>
+        <a class="page-btn" th:classappend="${currentPage == totalPages-1} ? 'disabled'"
+           th:href="@{/searchTopics(keyword=${keyword},page=${currentPage+1},size=${size})}">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+    </nav>
+
+    <div class="back-row">
+        <a href="/topics" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Topics</a>
+    </div>
+
+</div>
 </body>
-
 </html>

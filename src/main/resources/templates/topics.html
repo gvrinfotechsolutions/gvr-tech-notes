@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Topics — GVR_T_Notes</title>
     <meta charset="UTF-8">
@@ -156,7 +157,7 @@
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> Home</a>
         <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
-        <a href="/admin"><i class="bi bi-speedometer2"></i> Admin</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')"><i class="bi bi-speedometer2"></i> Admin</a>
     </nav>
     <div class="topbar-right">
         <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
@@ -217,7 +218,7 @@
                     </div>
                     <div class="empty-subject">
                         <p>No topics yet. Start building your knowledge base.</p>
-                        <a th:href="@{/addTopic(subjectId=${selectedSubjectId})}" class="btn-action btn-add">
+                        <a th:href="@{/addTopic(subjectId=${selectedSubjectId})}" class="btn-action btn-add" sec:authorize="hasRole('ADMIN')">
                             <i class="bi bi-plus-circle"></i> Add First Topic
                         </a>
                     </div>
@@ -250,7 +251,7 @@
                                 <i class="bi bi-arrow-repeat"></i> Reset
                             </a>
                             <a href="/notes" class="btn-action btn-notes"><i class="bi bi-journal-text"></i> Notes</a>
-                            <a th:href="@{/addTopic(subjectId=${entry.value[0].subject.id})}" class="btn-action btn-add">
+                            <a th:href="@{/addTopic(subjectId=${entry.value[0].subject.id})}" class="btn-action btn-add" sec:authorize="hasRole('ADMIN')">
                                 <i class="bi bi-plus-circle"></i> Add Topic
                             </a>
                         </div>
@@ -281,7 +282,7 @@
                                 <!-- VIEW -->
                                 <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-view" title="View"><i class="bi bi-eye"></i></a>
                                 <!-- EDIT -->
-                                <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-edit" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-edit" title="Edit" sec:authorize="hasRole('ADMIN')"><i class="bi bi-pencil"></i></a>
                                 <!-- MARK COMPLETE -->
                                 <a th:if="${completedTopicsMap == null or !completedTopicsMap[topic.id]}"
                                    th:href="${selectedSubjectId != null}
@@ -303,7 +304,7 @@
             <div class="empty-full-icon"><i class="bi bi-journals"></i></div>
             <div class="empty-full-title">No Topics Yet</div>
             <p class="empty-full-desc">Start building your knowledge base by adding your first topic.</p>
-            <a th:href="@{/addTopic}" class="btn-primary-lg"><i class="bi bi-plus-circle"></i> Add First Topic</a>
+            <a th:href="@{/addTopic}" class="btn-primary-lg" sec:authorize="hasRole('ADMIN')"><i class="bi bi-plus-circle"></i> Add First Topic</a>
         </div>
 
         <!-- PAGINATION — SUBJECT TOPICS -->

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>GVR_T_Notes — Home</title>
     <meta charset="UTF-8">
@@ -123,7 +124,7 @@
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> <span>Home</span></a>
         <a href="/topics"><i class="bi bi-grid"></i> <span>Topics</span></a>
-        <a href="/admin"><i class="bi bi-speedometer2"></i> <span>Admin</span></a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')"><i class="bi bi-speedometer2"></i> <span>Admin</span></a>
     </nav>
 
     <form th:action="@{/logout}" method="post" style="margin:0;">
@@ -194,13 +195,13 @@
                 <div class="subject-card-desc" th:text="${sub.description != null and !#strings.isEmpty(sub.description) ? sub.description : 'Click to explore topics in this subject.'}"></div>
                 <div class="card-actions">
                     <a th:href="@{/subjectTopics/{id}(id=${sub.id})}" class="btn-open"><i class="bi bi-book-open"></i> Open</a>
-                    <a th:href="@{/editSubject/{id}(id=${sub.id})}" class="btn-edit"><i class="bi bi-pencil"></i> Edit</a>
+                    <a th:href="@{/editSubject/{id}(id=${sub.id})}" class="btn-edit" sec:authorize="hasRole('ADMIN')"><i class="bi bi-pencil"></i> Edit</a>
                 </div>
             </div>
         </div>
 
         <!-- ADD SUBJECT -->
-        <div class="form-card">
+        <div class="form-card" sec:authorize="hasRole('ADMIN')">
             <div class="form-card-title"><i class="bi bi-plus-circle" style="color:var(--primary)"></i> Add / Update Subject</div>
             <form th:action="@{/saveSubject}" method="post" th:object="${subject}">
                 <input type="hidden" th:field="*{id}">

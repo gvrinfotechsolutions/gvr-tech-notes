@@ -22,7 +22,14 @@ public class SecurityConfig {
 						.requestMatchers("/login", "/register", "/error", "/css/**", "/js/**", "/images/**").permitAll()
 
 						// ADMIN ONLY URLS
-						.requestMatchers("/saveTopic", "/edit/**", "/delete/**", "/admin/**").hasRole("ADMIN")
+						.requestMatchers(
+								"/saveTopic", "/saveSubject",
+								"/editTopic/**", "/editSubject/**",
+								"/addTopic", "/addTopic/**",
+								"/edit/**", "/delete/**",
+								"/admin/**",
+								"/export-pdf"
+						).hasRole("ADMIN")
 
 						// USER + ADMIN ACCESS
 						.requestMatchers("/", "/topics/**", "/view-topic/**").hasAnyRole("ADMIN", "USER")

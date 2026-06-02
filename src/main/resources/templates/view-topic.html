@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>View Topic - GVR_T_Notes</title>
     <meta charset="UTF-8">
@@ -529,7 +530,7 @@
     <a href="/topics" class="btn-action dark">
         <i class="bi bi-arrow-left"></i> Back
     </a>
-    <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-action warn">
+    <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-action warn" sec:authorize="hasRole('ADMIN')">
         <i class="bi bi-pencil"></i> Edit Topic
     </a>
 </div>

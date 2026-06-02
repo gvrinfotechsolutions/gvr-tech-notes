@@ -19,7 +19,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// PUBLIC PAGES
-						.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+						.requestMatchers("/login", "/register", "/error", "/css/**", "/js/**", "/images/**").permitAll()
 
 						// ADMIN ONLY URLS
 						.requestMatchers("/saveTopic", "/edit/**", "/delete/**", "/admin/**").hasRole("ADMIN")
@@ -37,7 +37,11 @@ public class SecurityConfig {
 
 						.defaultSuccessUrl("/", true)
 
-						.failureUrl("/login?error=true")
+						.failureHandler((request, response, exception) -> {
+							String reason = (exception instanceof org.springframework.security.authentication.DisabledException)
+									? "pending" : "true";
+							response.sendRedirect("/login?error=" + reason);
+						})
 
 						.permitAll())
 
@@ -54,8 +58,9 @@ public class SecurityConfig {
 
 						.permitAll())
 
-				// CSRF CONFIGURATION
-				.csrf(csrf -> csrf.disable());
+				// CSRF is enabled; JS fetch calls must include the X-CSRF-TOKEN header
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers("/trackView/**"));
 
 		return http.build();
 	}

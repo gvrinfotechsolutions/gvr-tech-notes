@@ -1,651 +1,777 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-
-	<title>View Topic - GVR_T_Notes</title>
-
-	<meta charset="UTF-8">
-
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-
-	<!-- BOOTSTRAP -->
-
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-	<!-- ICONS -->
-
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-	<!-- PRISM -->
-
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-
-	<!-- GITHUB MARKDOWN -->
-
-	<link rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css">
-
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-
-		body {
-			background: #f8fafc;
-			font-family: Arial, sans-serif;
-			color: #333;
-		}
-
-		/* NAVBAR */
-
-		.top-navbar {
-			height: 60px;
-			background: white;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 0 25px;
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-			position: sticky;
-			top: 0;
-			z-index: 1000;
-		}
-
-		.logo {
-			font-size: 24px;
-			font-weight: 700;
-			color: #2d9d78;
-		}
-
-		.nav-links a {
-			text-decoration: none;
-			margin-left: 18px;
-			color: #555;
-			font-size: 14px;
-			font-weight: 500;
-		}
-
-		.nav-links a:hover {
-			color: #2d9d78;
-		}
-
-		/* MAIN PAGE LAYOUT */
-
-		.page-container {
-			max-width: 1100px;
-			margin: 35px auto;
-			padding: 0 20px;
-		}
-
-		/* SIDE BANNERS */
-
-		.banner-section {
-			width: 18%;
-			position: sticky;
-			top: 90px;
-			align-self: flex-start;
-		}
-
-		.banner-section img {
-
-			width: 100%;
-			height: 85vh;
-
-			object-fit: cover;
-
-			border-radius: 16px;
-
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		}
-
-		/* CENTER CONTENT */
-
-		.content-wrapper {
-			width: 100%;
-		}
-
-		/* ARTICLE CARD */
-
-		.article-card {
-			background: white;
-			border-radius: 16px;
-			padding: 35px;
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-		}
-
-		/* SUBJECT */
-
-		.subject-badge {
-			display: inline-block;
-			background: #e9f7f1;
-			color: #2d9d78;
-			padding: 6px 14px;
-			border-radius: 20px;
-			font-size: 12px;
-			font-weight: 600;
-			margin-bottom: 15px;
-		}
-
-		/* TAGS */
-
-		.tag-badge {
-			margin-right: 6px;
-			margin-bottom: 8px;
-			font-size: 12px;
-		}
-
-		/* TITLE */
-
-		.topic-title {
-			font-size: 34px;
-			font-weight: 700;
-			color: #222;
-			margin-top: 15px;
-			margin-bottom: 0;
-			line-height: 1.3;
-		}
-
-		/* BUTTONS */
-
-		.action-buttons {
-			margin-bottom: 25px;
-		}
-
-		.action-buttons a {
-			margin-right: 10px;
-			border-radius: 10px;
-		}
-
-		/* MARKDOWN */
-
-		.markdown-body {
-			background: white;
-			font-size: 16px;
-			line-height: 1.9;
-			color: #333;
-		}
-
-		.markdown-body h1,
-		.markdown-body h2,
-		.markdown-body h3,
-		.markdown-body h4 {
-
-			margin-top: 35px;
-			margin-bottom: 18px;
-			font-weight: 700;
-			color: #222;
-		}
-
-		.markdown-body p {
-			margin-bottom: 18px;
-		}
-
-		.markdown-body ul {
-			padding-left: 22px;
-			margin-bottom: 18px;
-		}
-
-		.markdown-body li {
-			margin-bottom: 8px;
-		}
-
-		/* CODE BLOCK */
-
-		.markdown-body pre {
-			background: #0d1117 !important;
-			border-radius: 14px;
-			padding: 18px;
-			overflow: auto;
-			margin-top: 20px;
-			margin-bottom: 25px;
-		}
-
-		.markdown-body code {
-			font-family: Consolas, monospace;
-			font-size: 14px;
-		}
-
-		/* INLINE CODE */
-
-		.markdown-body p code,
-		.markdown-body li code {
-
-			background: #f1f3f5;
-			color: #d63384;
-			padding: 3px 6px;
-			border-radius: 6px;
-		}
-
-		/* TABLES */
-
-		.markdown-body table {
-			width: 100%;
-			border-collapse: collapse;
-			margin-top: 20px;
-			margin-bottom: 20px;
-		}
-
-		.markdown-body table th,
-		.markdown-body table td {
-
-			border: 1px solid #ddd;
-			padding: 12px;
-		}
-
-		.markdown-body table th {
-			background: #f8f9fa;
-		}
-
-		/* BLOCKQUOTE */
-
-		.markdown-body blockquote {
-
-			border-left: 4px solid #2d9d78;
-			padding-left: 15px;
-			color: #555;
-			margin: 20px 0;
-		}
-
-		/* CODE SECTION */
-
-		.code-section {
-			margin-top: 45px;
-		}
-
-		.code-title {
-			font-size: 22px;
-			font-weight: 700;
-			margin-bottom: 15px;
-		}
-
-		/* ANALYTICS PANEL */
-
-		.analytics-box {
-
-			display: flex;
-
-			gap: 20px;
-
-			background: linear-gradient(to right,
-					#ffffff,
-					#f8fffc);
-
-			padding: 12px 18px;
-
-			border-radius: 16px;
-
-			border: 1px solid rgba(0, 0, 0, 0.05);
-
-			box-shadow:
-				0 8px 20px rgba(0, 0, 0, 0.06);
-
-			backdrop-filter: blur(10px);
-
-			transition: all 0.25s ease;
-		}
-
-		/* HOVER EFFECT */
-
-		.analytics-box:hover {
-
-			transform: translateY(-2px);
-
-			box-shadow:
-				0 12px 28px rgba(0, 0, 0, 0.10);
-		}
-
-		/* ITEM */
-
-		.analytics-item {
-
-			display: flex;
-
-			align-items: center;
-
-			gap: 10px;
-		}
-
-		/* ICON */
-
-		.analytics-icon {
-
-			font-size: 1.2rem;
-
-			color: #2d9d78;
-		}
-
-		/* LABEL */
-
-		.analytics-label {
-
-			font-size: 10px;
-
-			font-weight: 700;
-
-			text-transform: uppercase;
-
-			letter-spacing: 1px;
-
-			color: #6c757d;
-		}
-
-		/* VALUE */
-
-		.analytics-value {
-
-			font-size: 18px;
-
-			font-weight: 800;
-
-			color: #1f2937;
-		}
-
-		/* DATE */
-
-		.analytics-date {
-
-			font-size: 12px;
-
-			font-weight: 600;
-
-			color: #495057;
-		}
-
-		/* MOBILE */
-
-		@media(max-width:768px) {
-
-			.analytics-box {
-
-				width: 100%;
-
-				justify-content: space-between;
-			}
-		}
-
-		/* RESPONSIVE */
-
-		@media(max-width:768px) {
-
-			.banner-section {
-				display: none;
-			}
-
-			.content-wrapper {
-				width: 100%;
-			}
-
-			.page-container {
-				padding: 0 12px;
-			}
-
-			.article-card {
-				padding: 22px;
-			}
-
-			.topic-title {
-				font-size: 26px;
-			}
-
-			.markdown-body {
-				font-size: 15px;
-			}
-
-			.logo {
-				font-size: 18px;
-			}
-		}
-
-		.analytics-item {
-
-			min-width: 120px;
-		}
-
-		.analytics-container {
-
-			min-width: 260px;
-
-			flex-shrink: 0;
-		}
-	</style>
-
+    <title>View Topic - GVR_T_Notes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary:       #16a37f;
+            --primary-light: #e6f7f2;
+            --primary-dark:  #0e7a5f;
+            --accent:        #f59e0b;
+            --accent-light:  #fef3c7;
+            --bg:            #f4f6f9;
+            --surface:       #ffffff;
+            --border:        #e5e9ef;
+            --text:          #1e2330;
+            --text-muted:    #6b7280;
+            --note-bg:       #fffbeb;
+            --note-border:   #fde68a;
+            --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md:     0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg:     0 8px 32px rgba(0,0,0,0.10);
+            --radius:        14px;
+            --radius-sm:     8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        /* ══════════════════════════════
+           TOP BAR
+        ══════════════════════════════ */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+        .topbar-logo {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .topbar-logo:hover { color: var(--primary-dark); }
+        .topbar-nav { display: flex; align-items: center; gap: 6px; }
+        .topbar-nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s;
+        }
+        .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .btn-logout {
+            font-size: 13px; font-weight: 600;
+            padding: 6px 14px; border-radius: var(--radius-sm);
+            border: 1.5px solid #fca5a5;
+            color: #ef4444; background: #fff5f5;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-logout:hover { background: #fee2e2; }
+
+        /* ══════════════════════════════
+           BREADCRUMB / ACTION ROW
+        ══════════════════════════════ */
+        .action-row {
+            max-width: 1380px;
+            margin: 20px auto 14px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 13px; font-weight: 600;
+            padding: 7px 15px; border-radius: var(--radius-sm);
+            border: none; cursor: pointer; transition: all 0.15s;
+            text-decoration: none;
+        }
+        .btn-action.dark    { background: #1e2330; color: #fff; }
+        .btn-action.dark:hover { background: #2d3448; }
+        .btn-action.warn    { background: #fef3c7; color: #92400e; border: 1.5px solid #fde68a; }
+        .btn-action.warn:hover { background: #fde68a; }
+
+        /* ══════════════════════════════
+           MAIN SPLIT LAYOUT
+        ══════════════════════════════ */
+        .main-layout {
+            max-width: 1380px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 22px;
+            align-items: start;
+        }
+
+        /* ══════════════════════════════
+           LEFT — CONTENT CARD
+        ══════════════════════════════ */
+        .content-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .content-header {
+            padding: 28px 36px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .subject-chip {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .tag-chip {
+            background: #f0fdf4;
+            color: #166534;
+            font-size: 11px; font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .content-title {
+            font-size: clamp(22px, 2.8vw, 34px);
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+            margin-bottom: 18px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            display: flex; align-items: center; gap: 7px;
+            background: var(--bg);
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+        .stat-icon { color: var(--primary); font-size: 14px; }
+        .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); }
+        .stat-value { font-size: 15px; font-weight: 800; color: var(--text); }
+        .stat-date  { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+        /* ══════════════════════════════
+           MARKDOWN CONTENT
+        ══════════════════════════════ */
+        .content-body {
+            padding: 32px 36px 36px;
+        }
+
+        .md {
+            font-size: 15.5px;
+            line-height: 1.85;
+            color: #374151;
+        }
+
+        .md h1 {
+            font-size: 1.85em; font-weight: 800;
+            color: var(--text); letter-spacing: -0.4px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            margin: 40px 0 18px;
+        }
+        .md h1:first-child { margin-top: 0; }
+
+        .md h2 {
+            font-size: 1.4em; font-weight: 700;
+            color: var(--text);
+            border-bottom: 1.5px solid #e5f0eb;
+            padding-bottom: 7px;
+            margin: 34px 0 14px;
+        }
+
+        .md h3 {
+            font-size: 1.1em; font-weight: 700;
+            color: var(--primary-dark);
+            margin: 26px 0 10px;
+        }
+
+        .md h4 {
+            font-size: 1em; font-weight: 700;
+            color: var(--text);
+            margin: 18px 0 8px;
+        }
+
+        .md p { margin-bottom: 14px; }
+
+        .md ul, .md ol {
+            padding-left: 24px; margin-bottom: 14px;
+        }
+        .md li { margin-bottom: 6px; }
+
+        /* Inline code */
+        .md code {
+            background: #f3f0ff;
+            color: #7c3aed;
+            padding: 2px 7px;
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.83em;
+            font-weight: 500;
+        }
+
+        /* Code blocks */
+        .md pre {
+            background: #0d1117 !important;
+            border-radius: 10px;
+            padding: 18px 20px;
+            overflow-x: auto;
+            margin: 18px 0 24px;
+            border: 1px solid #21262d;
+            position: relative;
+        }
+        .md pre code {
+            background: transparent !important;
+            color: #e6edf3 !important;
+            padding: 0;
+            font-size: 13.5px;
+            line-height: 1.65;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Tables */
+        .md table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0 26px;
+            font-size: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border);
+        }
+        .md table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 11px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .md table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #eef2ee;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+        .md table tr:last-child td { border-bottom: none; }
+        .md table tr:nth-child(even) td { background: #f9fdfb; }
+        .md table tr:hover td { background: #edf7f2; transition: background 0.1s; }
+
+        /* Blockquotes — Q&A / tips */
+        .md blockquote {
+            background: #f0faf5;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+            padding: 14px 18px;
+            margin: 18px 0;
+            color: #1f4e3d;
+        }
+        .md blockquote p { margin: 0; font-size: 14.5px; }
+
+        .md strong { color: var(--text); font-weight: 700; }
+        .md hr { border: none; border-top: 1.5px solid var(--border); margin: 28px 0; }
+
+        /* Code snippet section */
+        .snippet-section { margin-top: 36px; padding-top: 28px; border-top: 1.5px solid var(--border); }
+        .snippet-title {
+            font-size: 15px; font-weight: 700;
+            color: var(--text); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* ══════════════════════════════
+           RIGHT — NOTES PANEL
+        ══════════════════════════════ */
+        .notes-panel {
+            position: sticky;
+            top: 72px;
+            max-height: calc(100vh - 90px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notes-card {
+            background: var(--note-bg);
+            border: 1.5px solid var(--note-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: calc(100vh - 90px);
+        }
+
+        .notes-header {
+            padding: 18px 20px 14px;
+            border-bottom: 1.5px solid var(--note-border);
+            background: linear-gradient(135deg, #fef9e7, #fef3c7);
+        }
+        .notes-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .notes-title {
+            font-size: 15px; font-weight: 800;
+            color: #78350f;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .notes-subtitle { font-size: 12px; color: #a16207; }
+
+        /* IDLE state */
+        .notes-idle {
+            padding: 28px 20px;
+            text-align: center;
+        }
+        .notes-idle-icon { font-size: 44px; margin-bottom: 12px; }
+        .notes-idle p {
+            font-size: 13px; color: #92400e; line-height: 1.6;
+            margin-bottom: 18px;
+        }
+        .btn-start-notes {
+            width: 100%;
+            background: var(--accent);
+            color: #1c1917;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 11px;
+            font-size: 14px; font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-start-notes:hover {
+            background: #d97706;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+        }
+        .btn-view-notes {
+            width: 100%; margin-top: 10px;
+            background: transparent;
+            color: #92400e;
+            border: 1.5px solid var(--note-border);
+            border-radius: var(--radius-sm);
+            padding: 9px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+            text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .btn-view-notes:hover { background: #fef3c7; color: #78350f; }
+
+        /* ACTIVE editor state */
+        .notes-active { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        .notes-editor-wrap {
+            flex: 1; overflow-y: auto; padding: 12px 16px;
+        }
+
+        /* Quill overrides */
+        #noteContentEditor .ql-container.ql-snow {
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        #noteContentEditor .ql-toolbar.ql-snow {
+            border: none;
+            border-bottom: 1px solid var(--note-border);
+            background: #fefce8;
+            padding: 6px 8px;
+        }
+        #noteContentEditor .ql-editor {
+            min-height: 200px;
+            padding: 12px;
+            line-height: 1.7;
+        }
+
+        .notes-footer {
+            padding: 12px 16px;
+            border-top: 1.5px solid var(--note-border);
+            background: #fefce8;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .btn-save {
+            background: #16a34a; color: #fff;
+            border: none; border-radius: var(--radius-sm);
+            padding: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .btn-save:hover { background: #15803d; transform: translateY(-1px); }
+        .btn-close-notes {
+            background: transparent; color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 7px; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .btn-close-notes:hover { background: var(--bg); color: var(--text); }
+
+        #notesMessage {
+            font-size: 12px;
+            padding: 0 4px;
+        }
+        #notesMessage .alert {
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            margin: 0;
+            font-size: 12px;
+        }
+
+        /* ══════════════════════════════
+           BACK TO TOP
+        ══════════════════════════════ */
+        #backToTopBtn {
+            position: fixed; bottom: 24px; right: 24px;
+            display: none; z-index: 999;
+            background: var(--primary); color: #fff;
+            border: none; border-radius: 50px;
+            padding: 10px 18px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.15s;
+        }
+        #backToTopBtn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* ══════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════ */
+        @media (max-width: 960px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .notes-panel { position: static; max-height: none; }
+            .notes-card  { max-height: none; }
+            .content-header, .content-body { padding-left: 22px; padding-right: 22px; }
+        }
+        @media (max-width: 600px) {
+            .topbar { padding: 0 16px; }
+            .action-row { padding: 0 16px; }
+            .main-layout { padding: 0 16px 32px; }
+            .content-title { font-size: 22px; }
+            .stats-bar { gap: 10px; }
+        }
+    </style>
 </head>
 
 <body>
 
-	<!-- LOGOUT -->
-
-	<div class="d-flex justify-content-end
-	            align-items-center
-	            p-3
-	            bg-white
-	            shadow-sm">
-
-		<form th:action="@{/logout}" method="post">
-
-			<button type="submit" class="btn btn-outline-danger
-	                       rounded-pill
-	                       px-4">
-
-				🚪 Logout
-
-			</button>
-
-		</form>
-
-	</div>
-
-	<!-- NAVBAR -->
-
-	<div class="top-navbar">
-
-
-		<div class="logo">
-
-			<i class="bi bi-journal-richtext"></i>
-			GVR_T_Notes
-
-		</div>
-
-		<div class="nav-links">
-
-			<a href="/">
-				<i class="bi bi-house"></i> Home
-			</a>
-
-			<a href="/topics">
-				<i class="bi bi-book"></i> Topics
-			</a>
-
-		</div>
-
-	</div>
-
-	<div th:replace="fragments/banner :: learningBanner"></div>
-	<!-- PAGE -->
-
-	<div class="page-container">
-
-		<!-- LEFT BANNER -->
-
-
-
-		<!-- CENTER CONTENT -->
-
-		<div class="content-wrapper">
-
-			<!-- BUTTONS -->
-
-			<div class="action-buttons">
-
-				<a href="/topics" class="btn btn-dark btn-sm">
-
-					<i class="bi bi-arrow-left"></i>
-					Back
-
-				</a>
-
-				<a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn btn-warning btn-sm">
-
-					<i class="bi bi-pencil"></i>
-					Edit
-
-				</a>
-
-			</div>
-
-			<!-- ARTICLE -->
-
-			<div class="article-card">
-
-				<!-- SUBJECT -->
-
-				<div class="subject-badge" th:text="${topic.subject.name}"></div>
-
-				<!-- TAGS -->
-
-				<div class="mb-3">
-
-					<span th:each="tag : ${#strings.arraySplit(topic.tags, ',')}" class="badge bg-success tag-badge"
-						th:text="${tag}">
-					</span>
-
-				</div>
-
-				<!-- TITLE + ANALYTICS -->
-
-				<div class="d-flex
-				            justify-content-between
-				            align-items-start
-				            flex-wrap
-				            gap-3
-				            mb-4">
-
-					<!-- TITLE -->
-
-					<div class="topic-title mb-0" th:text="${topic.title}">
-
-					</div>
-
-					<!-- ANALYTICS -->
-
-
-					<div class="analytics-box analytics-container">
-
-
-
-						<!-- VIEWS -->
-
-						<div class="analytics-item">
-
-							<i class="bi bi-eye-fill analytics-icon"></i>
-
-							<div>
-
-								<div class="analytics-label">
-
-									Views
-
-								</div>
-
-								<div class="analytics-value" th:text="${topic.viewCount}">
-
-								</div>
-
-							</div>
-
-						</div>
-
-						<!-- LAST SEEN -->
-
-						<div class="analytics-item">
-
-							<i class="bi bi-clock-history analytics-icon"></i>
-
-							<div>
-
-								<div class="analytics-label">
-
-									Last Seen
-
-								</div>
-
-								<div class="analytics-date" th:text="${topic.lastViewedAt != null ?
-								     #temporals.format(topic.lastViewedAt,
-								     'dd MMM yyyy HH:mm') : 'Never'}">
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-				</div>
-
-				<!-- MARKDOWN CONTENT -->
-
-				<article class="markdown-body" th:utext="${htmlContent}">
-
-
-
-				</article>
-
-				<!-- CODE SECTION -->
-
-				<div class="code-section" th:if="${topic.codeSnippet != null
-                     && !#strings.isEmpty(topic.codeSnippet)}">
-
-					<div class="code-title">
-
-						<i class="bi bi-code-slash"></i>
-						Java Code
-
-					</div>
-
-					<pre>
-
-<code class="language-java"
-      th:text="${topic.codeSnippet}"></code>
-
-                    </pre>
-
-				</div>
-
-			</div>
-
-		</div>
-
-		<!-- RIGHT BANNER -->
-
-
-
-	</div>
-
-	<!-- PRISM JS -->
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
-
-	<script>
-
-		// TRACK REAL READING
-
-		setTimeout(() => {
-
-			fetch('/trackView/[[${topic.id}]]', {
-
-				method: 'POST'
-			});
-
-		}, 15000);
-
-	</script>
+<!-- ── TOP BAR ── -->
+<header class="topbar">
+    <a href="/" class="topbar-logo">
+        <i class="bi bi-journal-richtext"></i> GVR_T_Notes
+    </a>
+    <nav class="topbar-nav">
+        <a href="/"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+    </nav>
+    <div class="topbar-right">
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </div>
+</header>
+
+<!-- LEARNING BANNER -->
+<div th:replace="fragments/banner :: learningBanner"></div>
+
+<!-- ── ACTION ROW ── -->
+<div class="action-row">
+    <a href="/topics" class="btn-action dark">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-action warn">
+        <i class="bi bi-pencil"></i> Edit Topic
+    </a>
+</div>
+
+<!-- ── MAIN 70/30 LAYOUT ── -->
+<div class="main-layout">
+
+    <!-- ══ LEFT — TOPIC CONTENT (70%) ══ -->
+    <div class="content-card">
+
+        <!-- HEADER -->
+        <div class="content-header">
+
+            <!-- Subject + Tags -->
+            <div class="meta-row">
+                <span class="subject-chip" th:text="${topic.subject.name}"></span>
+                <span th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
+                      class="tag-chip" th:text="${#strings.trim(tag)}"></span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="content-title" th:text="${topic.title}"></h1>
+
+            <!-- Stats -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <i class="bi bi-eye-fill stat-icon"></i>
+                    <div>
+                        <div class="stat-label">Views</div>
+                        <div class="stat-value" th:text="${topic.viewCount}">0</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="bi bi-clock-history stat-icon"></i>
+                    <div>
+                        <div class="stat-label">Last Seen</div>
+                        <div class="stat-date"
+                             th:text="${topic.lastViewedAt != null ?
+                             #temporals.format(topic.lastViewedAt,'dd MMM yyyy, HH:mm') : 'First visit'}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARKDOWN BODY -->
+        <div class="content-body">
+            <article class="md" th:utext="${htmlContent}"></article>
+
+            <!-- Code Snippet -->
+            <div class="snippet-section"
+                 th:if="${topic.codeSnippet != null && !#strings.isEmpty(topic.codeSnippet)}">
+                <div class="snippet-title">
+                    <i class="bi bi-code-slash" style="color:var(--primary)"></i>
+                    Java Code Example
+                </div>
+                <pre><code class="language-java" th:text="${topic.codeSnippet}"></code></pre>
+            </div>
+        </div>
+
+    </div>
+    <!-- end content-card -->
+
+    <!-- ══ RIGHT — NOTES PANEL (30%) ══ -->
+    <aside class="notes-panel">
+        <div class="notes-card">
+
+            <!-- Notes Header -->
+            <div class="notes-header">
+                <div class="notes-header-top">
+                    <div class="notes-title">
+                        <i class="bi bi-pencil-square"></i> My Notes
+                    </div>
+                </div>
+                <div class="notes-subtitle">Capture key insights while you read</div>
+            </div>
+
+            <!-- Hidden topicId -->
+            <input type="hidden" id="topicId" th:value="${topic.id}">
+
+            <!-- IDLE STATE -->
+            <div class="notes-idle" id="notesIdle">
+                <div class="notes-idle-icon">📝</div>
+                <p>Write your own notes and insights while reading. Saved automatically to your notes library.</p>
+                <button class="btn-start-notes" id="prepareNotesBtn">
+                    <i class="bi bi-journal-plus"></i>
+                    <span id="notesButtonText">Start Taking Notes</span>
+                </button>
+                <a href="/notes" class="btn-view-notes">
+                    <i class="bi bi-journals"></i> View All My Notes
+                </a>
+            </div>
+
+            <!-- ACTIVE EDITOR STATE -->
+            <div class="notes-active" id="notesActive">
+                <div class="notes-editor-wrap">
+                    <div id="noteContentEditor"></div>
+                </div>
+                <div class="notes-footer">
+                    <div id="notesMessage"></div>
+                    <button class="btn-save" id="saveNotesBtn">
+                        <i class="bi bi-check-circle"></i> Save Notes
+                    </button>
+                    <div style="display:flex;gap:8px;">
+                        <a href="/notes" class="btn-view-notes" style="flex:1;margin-top:0;">
+                            <i class="bi bi-journals"></i> All Notes
+                        </a>
+                        <button class="btn-close-notes" id="closeNotesBtn" style="flex:1;">
+                            <i class="bi bi-x"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+    <!-- end notes-panel -->
+
+</div>
+<!-- end main-layout -->
+
+<!-- BACK TO TOP -->
+<button id="backToTopBtn"><i class="bi bi-arrow-up"></i> Top</button>
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ── CSRF token for AJAX POSTs ──
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    // ── Quill init ──
+    const quill = new Quill('#noteContentEditor', {
+        theme: 'snow',
+        placeholder: 'Write your notes here...',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+            ]
+        }
+    });
+
+    // ── Track view after 15s ──
+    setTimeout(() => {
+        fetch('/trackView/[[${topic.id}]]', { method: 'POST' });
+    }, 15000);
+
+    // ── Open notes editor ──
+    document.getElementById("prepareNotesBtn").addEventListener("click", function() {
+        const topicId = document.getElementById("topicId").value;
+        fetch('/notes/topic/' + topicId)
+            .then(r => r.text())
+            .then(data => {
+                if (data && data.trim() !== "" && data.trim() !== "<p><br></p>") {
+                    quill.root.innerHTML = data;
+                    document.getElementById("notesButtonText").innerText = "Resume Notes";
+                } else {
+                    quill.root.innerHTML = "";
+                }
+                document.getElementById("notesIdle").style.display   = "none";
+                document.getElementById("notesActive").style.display = "flex";
+            })
+            .catch(() => {
+                document.getElementById("notesIdle").style.display   = "none";
+                document.getElementById("notesActive").style.display = "flex";
+            });
+    });
+
+    // ── Close notes ──
+    document.getElementById("closeNotesBtn").addEventListener("click", function() {
+        document.getElementById("notesActive").style.display = "none";
+        document.getElementById("notesIdle").style.display   = "block";
+    });
+
+    // ── Save notes ──
+    document.getElementById("saveNotesBtn").addEventListener("click", function() {
+        const topicId    = document.getElementById("topicId").value;
+        const noteContent = quill.root.innerHTML;
+        if (quill.getText().trim().length === 0) {
+            showMsg("Please write something before saving.", "warning"); return;
+        }
+        const btn = document.getElementById("saveNotesBtn");
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+        btn.disabled = true;
+
+        fetch('/notes/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+            body: JSON.stringify({ topicId, noteContent })
+        })
+        .then(r => r.text())
+        .then(() => {
+            showMsg("Saved successfully ✓", "success");
+            document.getElementById("notesButtonText").innerText = "Resume Notes";
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Save Notes';
+            btn.disabled = false;
+        })
+        .catch(() => {
+            showMsg("Error saving notes.", "danger");
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Save Notes';
+            btn.disabled = false;
+        });
+    });
+
+    function showMsg(msg, type) {
+        const el = document.getElementById("notesMessage");
+        const colors = { success:'#dcfce7', warning:'#fef3c7', danger:'#fee2e2' };
+        const textColors = { success:'#166534', warning:'#92400e', danger:'#991b1b' };
+        el.innerHTML = `<div style="background:${colors[type]};color:${textColors[type]};
+            padding:7px 10px;border-radius:7px;font-size:12px;font-weight:600;margin-bottom:6px;">${msg}</div>`;
+        setTimeout(() => { el.innerHTML = ""; }, 3000);
+    }
+
+    // ── On page load: update button if notes exist ──
+    window.addEventListener("load", function() {
+        const topicId = document.getElementById("topicId").value;
+        fetch('/notes/topic/' + topicId)
+            .then(r => r.text())
+            .then(data => {
+                if (data && data.trim() !== "" && data.trim() !== "<p><br></p>") {
+                    document.getElementById("notesButtonText").innerText = "Resume Notes";
+                    const btn = document.getElementById("prepareNotesBtn");
+                    btn.innerHTML = '<i class="bi bi-journal-check"></i> Resume Notes';
+                }
+            });
+    });
+
+    // ── Back to top ──
+    const topBtn = document.getElementById("backToTopBtn");
+    window.addEventListener("scroll", () => {
+        topBtn.style.display = window.scrollY > 400 ? "block" : "none";
+    });
+    topBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+</script>
 
 </body>
-
 </html>

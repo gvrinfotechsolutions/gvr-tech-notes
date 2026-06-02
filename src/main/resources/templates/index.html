@@ -166,6 +166,9 @@
 			padding: 18px;
 			transition: 0.2s;
 			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+			display: flex;
+			flex-direction: column;
 		}
 
 		.subject-card:hover {
@@ -179,11 +182,10 @@
 		}
 
 		.subject-description {
-			margin-top: 12px;
+			margin-top: 8px;
 			color: #666;
 			font-size: 14px;
 			line-height: 1.5;
-			min-height: 55px;
 		}
 
 		.card-buttons {
@@ -246,12 +248,86 @@
 			font-weight: 500;
 		}
 
+		.notes-card {
+
+		    background: #fff8dc;
+
+		    border-left: 5px solid #ffc107 !important;
+
+		    transition: all 0.3s ease;
+		}		.notes-card:hover {
+
+		    transform: translateY(-2px);
+
+		    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+		}
+
 		@media(max-width:992px) {
 
 			.sidebar {
 				display: none;
 			}
 
+		}
+
+		@media (max-width: 768px) {
+
+			.top-navbar {
+				flex-direction: column;
+				height: auto;
+				gap: 15px;
+				padding: 15px;
+			}
+
+			.search-box {
+				width: 100%;
+			}
+
+			.search-box form {
+				width: 100%;
+			}
+
+			.nav-links {
+				display: flex;
+				justify-content: center;
+				flex-wrap: wrap;
+				gap: 15px;
+			}
+
+			.subject-grid {
+				grid-template-columns: repeat(2, 1fr);
+				gap: 12px;
+			}
+		}
+
+		.hero-title {
+			font-size: 18px;
+		}
+
+		.hero-subtitle {
+			font-size: 13px;
+		}
+
+		.hero-section {
+			padding: 20px;
+		}
+
+		.hero-title {
+			font-size: 24px;
+		}
+
+		.hero-subtitle {
+			font-size: 14px;
+		}
+
+		.subject-name {
+			font-size: 16px;
+		}
+
+		.card-buttons {
+			display: flex;
+			justify-content: center;
+			gap: 10px;
 		}
 	</style>
 
@@ -379,6 +455,32 @@
 
 			</div>
 
+			<div class="card shadow-sm mb-4 border-0 notes-card">
+
+				<div class="card-body text-center">
+
+					<h4 class="mb-2">
+
+						📒 Review My Notes
+
+					</h4>
+
+					<p class="text-muted">
+
+						Revise all your important learning notes in one place.
+
+					</p>
+
+					<a href="/notes" class="btn btn-success">
+
+						Review Notes
+
+					</a>
+
+				</div>
+
+			</div>
+
 			<!-- SUBJECTS -->
 
 			<div class="section-title">
@@ -400,7 +502,12 @@
 
 					<!-- DESCRIPTION -->
 
-					<div class="subject-description" th:text="${sub.description}"></div>
+					<div class="subject-description">
+
+						Topics:
+						<span th:text="${subjectTopicCountMap.get(sub.id)}"></span>
+
+					</div>
 
 					<!-- BUTTONS -->
 

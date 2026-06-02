@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.gvr.notes.model.User;
-import com.gvr.notes.service.SolrService;
 import com.gvr.notes.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +21,12 @@ public class AdminController {
 
 	private final UserService userService;
 
-	private final SolrService solrService;
 
-	public AdminController(UserService userService, SolrService solrService) {
+
+	public AdminController(UserService userService) {
 
 		this.userService = userService;
-		this.solrService = solrService;
+		
 	}
 
 	@GetMapping("/pending-users")
@@ -69,28 +67,28 @@ public class AdminController {
 	    return "redirect:/admin/pending-users";
 	}
 
-	@GetMapping("/reindex-solr")
-	public String reindexSolr(RedirectAttributes ra) {
-
-	    log.info("Solr reindex operation started");
-
-	    try {
-
-	        solrService.reindexAllTopics();
-
-	        log.info("Solr reindex completed successfully");
-
-	        ra.addFlashAttribute("success",
-	                "Solr Reindex Completed Successfully");
-
-	    } catch (Exception e) {
-
-	        log.error("Solr reindex failed", e);
-
-	        ra.addFlashAttribute("error",
-	                "Solr Reindex Failed");
-	    }
-
-	    return "redirect:/admin";
-	}
+	/*
+	 * @GetMapping("/reindex-solr") public String reindexSolr(RedirectAttributes ra)
+	 * {
+	 * 
+	 * log.info("Solr reindex operation started");
+	 * 
+	 * try {
+	 * 
+	 * solrService.reindexAllTopics();
+	 * 
+	 * log.info("Solr reindex completed successfully");
+	 * 
+	 * ra.addFlashAttribute("success", "Solr Reindex Completed Successfully");
+	 * 
+	 * } catch (Exception e) {
+	 * 
+	 * log.error("Solr reindex failed", e);
+	 * 
+	 * ra.addFlashAttribute("error", "Solr Reindex Failed"); }
+	 * 
+	 * return "redirect:/admin"; }
+	 */
+	
+	
 }

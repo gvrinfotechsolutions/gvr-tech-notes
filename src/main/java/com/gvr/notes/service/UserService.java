@@ -2,6 +2,7 @@ package com.gvr.notes.service;
 
 import java.util.List;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,7 +11,7 @@ import com.gvr.notes.enums.Role;
 import com.gvr.notes.enums.Status;
 import com.gvr.notes.model.User;
 import com.gvr.notes.repository.UserRepository;
-
+import com.gvr.notes.exception.UserAlreadyExistsException;
 @Service
 public class UserService {
 
@@ -31,9 +32,9 @@ public class UserService {
                 request.getUsername()
         ).isPresent()) {
 
-            throw new RuntimeException(
-                    "Username already exists"
-            );
+        	throw new UserAlreadyExistsException(
+        	        "Username already exists"
+        	);
         }
 
         User user = new User();
@@ -87,12 +88,11 @@ public class UserService {
     
     
     
-    		public User findByUsername(String username) {
-
-    		    return userRepository
-    		            .findByUsername(username)
-    		            .orElse(null);
-    		}
+    public User findByUsername(String username) {
+        return userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
     		
 
 }

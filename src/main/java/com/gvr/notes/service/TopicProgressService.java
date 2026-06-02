@@ -106,4 +106,17 @@ public class TopicProgressService {
 
 		return completedCount;
 	}
+	
+	
+	public long getCompletedTopicsCount(Long userId) {
+
+	    long completedCount =
+	            progressRepository.countByUserIdAndCompletedTrue(userId);
+
+	    log.debug("Total completed topics fetched. userId={}, count={}",
+	            userId,
+	            completedCount);
+
+	    return completedCount;
+	}
 }

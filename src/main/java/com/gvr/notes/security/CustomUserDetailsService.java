@@ -1,7 +1,9 @@
 package com.gvr.notes.security;
 
+import com.gvr.notes.enums.Status;
 import com.gvr.notes.model.User;
 import com.gvr.notes.repository.UserRepository;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,11 +32,8 @@ public class CustomUserDetailsService
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
 
-        if(user.getStatus().name().equals("PENDING")) {
-
-            throw new UsernameNotFoundException(
-                    "User approval pending"
-            );
+        if (user.getStatus() == Status.PENDING || user.getStatus() == Status.REJECTED) {
+            throw new DisabledException("Account not approved");
         }
 
         return new org.springframework.security.core.userdetails.User(

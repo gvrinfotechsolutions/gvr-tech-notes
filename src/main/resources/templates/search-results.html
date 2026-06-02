@@ -52,18 +52,18 @@
 		}
 
 		.search-bar {
-			background: white;
-			padding: 20px;
-			border-radius: 15px;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
-			margin-bottom: 30px;
+		    background:white;
+		    padding:25px;
+		    border-radius:18px;
+		    box-shadow:0 4px 15px rgba(0,0,0,.06);
 		}
 
 		.topic-card {
-			border: none;
-			border-radius: 15px;
-			box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
-			transition: .25s;
+		    border: none;
+		    border-radius: 18px;
+		    box-shadow: 0 4px 15px rgba(0,0,0,.06);
+		    overflow: hidden;
+		    background: white;
 		}
 
 		.topic-card:hover {
@@ -220,8 +220,18 @@
 
 				</div>
 
-				<h3 class="topic-title mt-3" th:text="${topic.title}">
+				<h3 class="topic-title mt-3"
+				    th:text="${topic.title}">
 				</h3>
+
+				<div class="topic-content">
+
+				    <span th:text="${#strings.length(topic.content) > 180 ?
+				          #strings.substring(topic.content,0,180) + '...' :
+				          topic.content}">
+				    </span>
+
+				</div>
 
 				<!-- TAGS -->
 

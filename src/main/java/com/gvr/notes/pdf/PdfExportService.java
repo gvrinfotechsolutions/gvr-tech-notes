@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.gvr.notes.model.Topic;
+import lombok.extern.slf4j.Slf4j;
 import com.lowagie.text.Document;
 import com.lowagie.text.Font;
 import com.lowagie.text.Paragraph;
@@ -19,6 +20,7 @@ import com.lowagie.text.Chunk;
 import com.lowagie.text.FontFactory;
 
 @Service
+@Slf4j
 public class PdfExportService {
 
 	public ByteArrayInputStream exportTopicsPdf(
@@ -197,8 +199,8 @@ public class PdfExportService {
 			document.close();
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			log.error("PDF generation failed", e);
+			throw new RuntimeException("PDF generation failed", e);
 		}
 
 		return new ByteArrayInputStream(out.toByteArray());

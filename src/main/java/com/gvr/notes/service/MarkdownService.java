@@ -1,24 +1,33 @@
 package com.gvr.notes.service;
 
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
 
 @Service
 public class MarkdownService {
 
-    public String convertMarkdownToHtml(String markdown) {
+	private final Parser parser;
+	private final HtmlRenderer renderer;
 
-        Parser parser = Parser.builder().build();
+	public MarkdownService() {
+		MutableDataSet options = new MutableDataSet();
+		options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
+		options.set(HtmlRenderer.SOFT_BREAK, "<br />\n");
+		this.parser = Parser.builder(options).build();
+		this.renderer = HtmlRenderer.builder(options).build();
+	}
 
-        Node document = parser.parse(markdown);
-
-        HtmlRenderer renderer =
-                HtmlRenderer.builder().build();
-
-        return renderer.render(document);
-    }
+	public String convertMarkdownToHtml(String markdown) {
+		if (markdown == null || markdown.isBlank())
+			return "";
+		Node document = parser.parse(markdown);
+		return renderer.render(document);
+	}
 }

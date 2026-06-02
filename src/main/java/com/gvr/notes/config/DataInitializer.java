@@ -4,14 +4,25 @@ import com.gvr.notes.model.User;
 import com.gvr.notes.enums.Role;
 import com.gvr.notes.enums.Status;
 import com.gvr.notes.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${admin.username:venky}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
 
     public DataInitializer(UserRepository userRepository,
                            PasswordEncoder passwordEncoder) {
@@ -23,23 +34,16 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if(userRepository.findByUsername("venky").isEmpty()) {
+        if (userRepository.findByUsername(adminUsername).isEmpty()) {
 
             User admin = new User();
-
-            admin.setUsername("venky");
-
-            admin.setPassword(
-                    passwordEncoder.encode("V@777hills")
-            );
-
+            admin.setUsername(adminUsername);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(Role.ADMIN);
-
             admin.setStatus(Status.APPROVED);
 
             userRepository.save(admin);
-
-            System.out.println("ADMIN USER CREATED");
+            log.info("Admin user created: {}", adminUsername);
         }
     }
 }

@@ -21,5 +21,7 @@ public interface TopicProgressRepository extends JpaRepository<TopicProgress, Lo
 	void deleteByUserIdAndTopicSubjectId(Long userId, Long subjectId);
 
 	long countByUserIdAndTopic_Subject_IdAndCompletedTrue(Long userId, Long subjectId);
+	
+	long countByUserIdAndCompletedTrue(Long userId);
 
 }

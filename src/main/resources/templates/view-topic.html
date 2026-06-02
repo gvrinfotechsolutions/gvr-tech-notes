@@ -561,6 +561,59 @@
             overflow-x: auto;
         }
         .mermaid svg { max-width: 100%; height: auto; }
+
+        /* ══════════════════════════════
+           NOTES WRITE / PREVIEW TABS
+        ══════════════════════════════ */
+        .notes-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 8px 10px;
+            border-bottom: 1.5px solid var(--note-border);
+            background: #fefce8;
+            flex-shrink: 0;
+        }
+        .notes-tab {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1.5px solid transparent;
+            border-radius: 7px;
+            font-size: 12px; font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: #a16207;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .notes-tab.active {
+            background: var(--note-bg);
+            border-color: var(--note-border);
+            color: #78350f;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .notes-tab:hover:not(.active) { background: #fef3c7; }
+        .notes-preview {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.75;
+            color: #374151;
+            display: none;
+        }
+        .notes-preview p { margin-bottom: 10px; }
+        .notes-preview ul, .notes-preview ol { padding-left: 22px; margin-bottom: 10px; }
+        .notes-preview li { margin-bottom: 4px; }
+        .notes-preview strong { color: var(--text); font-weight: 700; }
+        .notes-preview h1, .notes-preview h2, .notes-preview h3 { font-weight: 700; color: var(--text); margin: 16px 0 8px; }
+        .notes-preview h1 { font-size: 1.35em; }
+        .notes-preview h2 { font-size: 1.15em; }
+        .notes-preview h3 { font-size: 1.0em; color: var(--primary-dark); }
+        .notes-preview blockquote { border-left: 4px solid var(--primary); background: var(--primary-light); border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 12px 0; color: #1f4e3d; font-size: 13px; }
+        .notes-preview code { font-family: 'JetBrains Mono', monospace; font-size: 0.83em; background: #f3f0ff; color: #7c3aed; padding: 2px 5px; border-radius: 4px; }
+        .notes-preview pre { background: #0d1117; color: #e6edf3; border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 10px 0; }
+        .notes-preview pre code { background: transparent; color: inherit; padding: 0; }
     </style>
 </head>
 
@@ -691,9 +744,21 @@
 
             <!-- ACTIVE EDITOR STATE -->
             <div class="notes-active" id="notesActive">
-                <div class="notes-editor-wrap">
+                <!-- WRITE / PREVIEW TABS -->
+                <div class="notes-tabs">
+                    <button class="notes-tab active" id="writeTab" onclick="switchTab('write')">
+                        <i class="bi bi-pencil"></i> Write
+                    </button>
+                    <button class="notes-tab" id="previewTab" onclick="switchTab('preview')">
+                        <i class="bi bi-eye"></i> Preview
+                    </button>
+                </div>
+                <!-- EDITOR PANE -->
+                <div class="notes-editor-wrap" id="notesEditorPane">
                     <div id="noteContentEditor"></div>
                 </div>
+                <!-- PREVIEW PANE -->
+                <div class="notes-preview" id="notesPreviewPane"></div>
                 <div class="notes-footer">
                     <div id="notesMessage"></div>
                     <button class="btn-save" id="saveNotesBtn">
@@ -783,6 +848,29 @@
         fetch('/trackView/[[${topic.id}]]', { method: 'POST' });
     }, 15000);
 
+    // ── Write / Preview tab toggle ──
+    function switchTab(tab) {
+        const editorPane  = document.getElementById('notesEditorPane');
+        const previewPane = document.getElementById('notesPreviewPane');
+        const writeTab    = document.getElementById('writeTab');
+        const previewTab  = document.getElementById('previewTab');
+        if (tab === 'write') {
+            writeTab.classList.add('active');
+            previewTab.classList.remove('active');
+            editorPane.style.display  = 'block';
+            previewPane.style.display = 'none';
+        } else {
+            previewTab.classList.add('active');
+            writeTab.classList.remove('active');
+            editorPane.style.display  = 'none';
+            previewPane.style.display = 'block';
+            const html = quill.root.innerHTML;
+            previewPane.innerHTML = (html && html.trim() !== '<p><br></p>' && html.trim() !== '')
+                ? html
+                : '<p style="color:#a16207;font-style:italic;text-align:center;padding:24px 0;">Nothing to preview yet. Switch to the Write tab to add notes.</p>';
+        }
+    }
+
     // ── Open notes editor ──
     document.getElementById("prepareNotesBtn").addEventListener("click", function() {
         const topicId = document.getElementById("topicId").value;
@@ -795,10 +883,12 @@
                 } else {
                     quill.root.innerHTML = "";
                 }
+                switchTab('write');
                 document.getElementById("notesIdle").style.display   = "none";
                 document.getElementById("notesActive").style.display = "flex";
             })
             .catch(() => {
+                switchTab('write');
                 document.getElementById("notesIdle").style.display   = "none";
                 document.getElementById("notesActive").style.display = "flex";
             });
@@ -808,6 +898,7 @@
     document.getElementById("closeNotesBtn").addEventListener("click", function() {
         document.getElementById("notesActive").style.display = "none";
         document.getElementById("notesIdle").style.display   = "block";
+        switchTab('write');
     });
 
     // ── Save notes ──

@@ -45,12 +45,13 @@
 
         /* NOTES LIST */
         .notes-list { display: flex; flex-direction: column; gap: 12px; }
-        .note-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border-left: 4px solid var(--accent); transition: all 0.18s; }
+        .note-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 18px 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-left: 4px solid var(--accent); transition: all 0.18s; }
         .note-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-        .note-card-info { min-width: 0; }
-        .note-card-title { font-size: 16px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .note-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; }
-        .note-card-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .note-card-info { min-width: 0; flex: 1; }
+        .note-card-subject { display: inline-block; background: var(--primary-light); color: var(--primary-dark); font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 7px; }
+        .note-card-title { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
+        .note-card-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .note-card-actions { display: flex; gap: 8px; flex-shrink: 0; align-self: center; }
         .btn-view { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; text-decoration: none; transition: all 0.15s; }
         .btn-topic { background: var(--bg); color: var(--text-muted); border: 1.5px solid var(--border); }
         .btn-topic:hover { background: var(--surface); color: var(--text); }
@@ -131,6 +132,7 @@
     <div class="notes-list" th:if="${not #lists.isEmpty(notes)}">
         <div class="note-card" th:each="note : ${notes}">
             <div class="note-card-info">
+                <div class="note-card-subject" th:text="${note.topic.subject.name}"></div>
                 <div class="note-card-title" th:text="${note.topic.title}">Topic Name</div>
                 <div class="note-card-meta">
                     <i class="bi bi-clock"></i>

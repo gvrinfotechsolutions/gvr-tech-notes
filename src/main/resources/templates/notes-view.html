@@ -10,6 +10,7 @@
     <style>
         :root {
             --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --accent: #f59e0b; --accent-light: #fef3c7;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
             --note-bg: #fffbeb; --note-border: #fde68a;
@@ -18,6 +19,9 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
+
+        /* ── READING PROGRESS ── */
+        #readingProgress { position: fixed; top: 0; left: 0; z-index: 9999; height: 3px; width: 0%; background: linear-gradient(90deg, var(--primary), #34d399); transition: width 0.1s linear; }
 
         /* ── TOPBAR ── */
         .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
@@ -29,18 +33,26 @@
         .btn-logout:hover { background: #fee2e2; }
 
         /* ── CONTENT ── */
-        .page-wrap { max-width: 860px; margin: 32px auto; padding: 0 20px 60px; }
+        .page-wrap { max-width: 860px; margin: 28px auto; padding: 0 20px 60px; }
 
-        .back-row { margin-bottom: 20px; }
+        /* ── ACTION ROW ── */
+        .action-row { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
         .btn-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); transition: all 0.15s; }
         .btn-back:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .btn-view-topic { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--primary-dark); text-decoration: none; padding: 7px 14px; border: 1.5px solid var(--primary-light); border-radius: var(--radius-sm); background: var(--primary-light); transition: all 0.15s; }
+        .btn-view-topic:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
 
+        /* ── TOPIC HEADER ── */
         .topic-header { margin-bottom: 24px; }
-        .topic-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
-        .topic-title { font-size: clamp(22px, 4vw, 32px); font-weight: 800; color: var(--text); line-height: 1.25; }
+        .meta-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .subject-chip { background: var(--primary-light); color: var(--primary-dark); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+        .tag-chip { background: #f0fdf4; color: #166534; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1px solid #bbf7d0; }
+        .topic-title { font-size: clamp(20px, 3.5vw, 30px); font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 10px; }
         .topic-title a { color: inherit; text-decoration: none; }
         .topic-title a:hover { color: var(--primary); }
-        .topic-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+        .topic-meta-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .topic-meta-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .topic-meta-item i { color: var(--primary); }
 
         /* ── NOTES CARD ── */
         .notes-card { background: var(--note-bg); border: 1.5px solid var(--note-border); border-radius: var(--radius); box-shadow: var(--shadow-md); overflow: hidden; }
@@ -102,10 +114,15 @@
             .topbar-nav { display: none; }
             .page-wrap { padding: 0 14px 48px; margin-top: 20px; }
             .notes-card-body { padding: 20px 18px 28px; }
+            .action-row { gap: 6px; }
+            .btn-back, .btn-view-topic { font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
 <body>
+
+<!-- READING PROGRESS BAR -->
+<div id="readingProgress"></div>
 
 <header class="topbar">
     <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
@@ -123,22 +140,41 @@
 
 <div class="page-wrap">
 
-    <div class="back-row">
+    <!-- ACTION ROW -->
+    <div class="action-row">
         <a href="/notes" class="btn-back"><i class="bi bi-arrow-left"></i> Back to Notes</a>
+        <a th:if="${note != null}" th:href="@{/viewTopic/{id}(id=${note.topic.id})}" class="btn-view-topic">
+            <i class="bi bi-book-open"></i> View Topic
+        </a>
     </div>
 
     <!-- NOTE EXISTS -->
     <div th:if="${note != null}">
 
         <div class="topic-header">
-            <div class="topic-meta"><i class="bi bi-journal-text"></i> Topic Note</div>
+            <!-- Subject + Tags -->
+            <div class="meta-row">
+                <span class="subject-chip" th:text="${note.topic.subject.name}"></span>
+                <span th:if="${note.topic.tags != null and !#strings.isEmpty(note.topic.tags)}"
+                      th:each="tag : ${#strings.arraySplit(note.topic.tags, ',')}"
+                      class="tag-chip" th:text="${#strings.trim(tag)}"></span>
+            </div>
+            <!-- Title -->
             <h1 class="topic-title">
                 <a th:href="@{/viewTopic/{id}(id=${note.topic.id})}" th:text="${note.topic.title}">Topic Name</a>
             </h1>
-            <p class="topic-subtitle">
-                Last updated:
-                <strong th:text="${#temporals.format(note.updatedDate, 'dd MMM yyyy, HH:mm')}">—</strong>
-            </p>
+            <!-- Meta -->
+            <div class="topic-meta-row">
+                <div class="topic-meta-item">
+                    <i class="bi bi-pencil-square"></i>
+                    My personal learning notes
+                </div>
+                <div class="topic-meta-item">
+                    <i class="bi bi-clock-history"></i>
+                    Last updated:
+                    <strong th:text="${#temporals.format(note.updatedDate, 'dd MMM yyyy, HH:mm')}">—</strong>
+                </div>
+            </div>
         </div>
 
         <div class="notes-card">
@@ -146,7 +182,7 @@
                 <i class="bi bi-pencil-square notes-card-header-icon"></i>
                 <div>
                     <div class="notes-card-header-title">My Learning Notes</div>
-                    <div class="notes-card-header-sub">Personal notes captured while reading</div>
+                    <div class="notes-card-header-sub">Personal notes captured while reading this topic</div>
                 </div>
             </div>
             <div class="notes-card-body">
@@ -165,6 +201,14 @@
     </div>
 
 </div>
+
+<script>
+    const bar = document.getElementById('readingProgress');
+    window.addEventListener('scroll', () => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = (total > 0 ? (window.scrollY / total) * 100 : 0) + '%';
+    });
+</script>
 
 </body>
 </html>

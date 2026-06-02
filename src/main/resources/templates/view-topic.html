@@ -742,8 +742,8 @@
     });
     mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
 
-    // ── Copy-code buttons on all <pre> blocks ──
-    document.querySelectorAll('.md pre').forEach(pre => {
+    // ── Copy-code buttons on all <pre> blocks (markdown content + code snippet) ──
+    document.querySelectorAll('.md pre, .snippet-section pre').forEach(pre => {
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
         btn.textContent = 'Copy';

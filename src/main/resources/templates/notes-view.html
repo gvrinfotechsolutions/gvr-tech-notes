@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         :root {
             --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
@@ -63,6 +64,30 @@
         .note-content code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: #f3f0ff; color: #7c3aed; padding: 2px 6px; border-radius: 4px; }
         .note-content pre code { background: transparent; color: inherit; padding: 0; font-size: 13px; }
         .note-content strong { color: var(--text); font-weight: 700; }
+
+        /* Tables (from Quill) */
+        .note-content table {
+            width: 100%; border-collapse: collapse;
+            margin: 16px 0 22px; font-size: 14px;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border);
+        }
+        .note-content table th {
+            background: var(--primary); color: #fff;
+            padding: 10px 14px; text-align: left;
+            font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .note-content table td {
+            padding: 9px 14px; border-bottom: 1px solid #eef2ee;
+            vertical-align: top; line-height: 1.55;
+        }
+        .note-content table tr:last-child td { border-bottom: none; }
+        .note-content table tr:nth-child(even) td { background: #f9fdfb; }
+        .note-content table tr:hover td { background: #edf7f2; }
+
+        /* Images */
+        .note-content img { max-width: 100%; border-radius: var(--radius-sm); margin: 8px 0; }
 
         /* ── EMPTY STATE ── */
         .empty-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 56px 32px; text-align: center; }

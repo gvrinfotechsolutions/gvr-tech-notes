@@ -2,6 +2,8 @@ package com.gvr.notes.service;
 
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
+import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
@@ -18,8 +20,15 @@ public class MarkdownService {
 
 	public MarkdownService() {
 		MutableDataSet options = new MutableDataSet();
-		options.set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
+		options.set(Parser.EXTENSIONS, Arrays.asList(
+			TablesExtension.create(),
+			StrikethroughExtension.create(),
+			TaskListExtension.create(),
+			AutolinkExtension.create()
+		));
 		options.set(HtmlRenderer.SOFT_BREAK, "<br />\n");
+		options.set(HtmlRenderer.GENERATE_HEADER_ID, true);
+		options.set(HtmlRenderer.RENDER_HEADER_ID, true);
 		this.parser = Parser.builder(options).build();
 		this.renderer = HtmlRenderer.builder(options).build();
 	}

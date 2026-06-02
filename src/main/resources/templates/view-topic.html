@@ -499,10 +499,75 @@
             .content-title { font-size: 22px; }
             .stats-bar { gap: 10px; }
         }
+
+        /* ══════════════════════════════
+           READING PROGRESS BAR
+        ══════════════════════════════ */
+        #readingProgress {
+            position: fixed; top: 0; left: 0; z-index: 9999;
+            height: 3px; width: 0%;
+            background: linear-gradient(90deg, var(--primary), #34d399);
+            transition: width 0.1s linear;
+        }
+
+        /* ══════════════════════════════
+           TASK LIST CHECKBOXES
+        ══════════════════════════════ */
+        .md .task-list-item { list-style: none; margin-left: -20px; }
+        .md .task-list-item-checkbox {
+            appearance: none; -webkit-appearance: none;
+            width: 16px; height: 16px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            margin-right: 8px; vertical-align: middle;
+            position: relative; cursor: default;
+            flex-shrink: 0; display: inline-block;
+        }
+        .md .task-list-item-checkbox:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .md .task-list-item-checkbox:checked::after {
+            content: '✓'; color: #fff; font-size: 11px; font-weight: 700;
+            position: absolute; top: -1px; left: 2px;
+        }
+
+        /* ══════════════════════════════
+           COPY CODE BUTTON
+        ══════════════════════════════ */
+        .md pre { position: relative; }
+        .copy-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(255,255,255,0.1); color: #9ca3af;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px; padding: 4px 10px;
+            font-size: 11px; font-weight: 600; cursor: pointer;
+            transition: all 0.15s; font-family: 'Inter', sans-serif;
+            letter-spacing: 0.3px;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.2); color: #e5e7eb; }
+        .copy-btn.copied { background: rgba(22,163,127,0.3); color: #6ee7b7; border-color: #6ee7b7; }
+
+        /* ══════════════════════════════
+           MERMAID DIAGRAMS
+        ══════════════════════════════ */
+        .mermaid {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 16px;
+            margin: 20px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+        .mermaid svg { max-width: 100%; height: auto; }
     </style>
 </head>
 
 <body>
+
+<!-- READING PROGRESS BAR -->
+<div id="readingProgress"></div>
 
 <!-- ── TOP BAR ── -->
 <header class="topbar">
@@ -657,14 +722,48 @@
 
 <!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    // ── CSRF token for AJAX POSTs ──
+    // ── CSRF ──
     const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
     const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    // ── Mermaid: convert <pre><code class="language-mermaid"> → <div class="mermaid"> ──
+    document.querySelectorAll('code.language-mermaid').forEach(el => {
+        const div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = el.textContent;
+        el.closest('pre').replaceWith(div);
+    });
+    mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+
+    // ── Copy-code buttons on all <pre> blocks ──
+    document.querySelectorAll('.md pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', () => {
+            const code = pre.querySelector('code');
+            navigator.clipboard.writeText(code ? code.innerText : pre.innerText).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+        });
+        pre.appendChild(btn);
+    });
+
+    // ── Reading progress bar ──
+    const progressBar = document.getElementById('readingProgress');
+    window.addEventListener('scroll', () => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = (total > 0 ? (window.scrollY / total) * 100 : 0) + '%';
+    });
 
     // ── Quill init ──
     const quill = new Quill('#noteContentEditor', {
@@ -713,7 +812,7 @@
 
     // ── Save notes ──
     document.getElementById("saveNotesBtn").addEventListener("click", function() {
-        const topicId    = document.getElementById("topicId").value;
+        const topicId     = document.getElementById("topicId").value;
         const noteContent = quill.root.innerHTML;
         if (quill.getText().trim().length === 0) {
             showMsg("Please write something before saving.", "warning"); return;
@@ -721,7 +820,6 @@
         const btn = document.getElementById("saveNotesBtn");
         btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
         btn.disabled = true;
-
         fetch('/notes/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
@@ -743,14 +841,14 @@
 
     function showMsg(msg, type) {
         const el = document.getElementById("notesMessage");
-        const colors = { success:'#dcfce7', warning:'#fef3c7', danger:'#fee2e2' };
+        const colors    = { success:'#dcfce7', warning:'#fef3c7', danger:'#fee2e2' };
         const textColors = { success:'#166534', warning:'#92400e', danger:'#991b1b' };
         el.innerHTML = `<div style="background:${colors[type]};color:${textColors[type]};
             padding:7px 10px;border-radius:7px;font-size:12px;font-weight:600;margin-bottom:6px;">${msg}</div>`;
         setTimeout(() => { el.innerHTML = ""; }, 3000);
     }
 
-    // ── On page load: update button if notes exist ──
+    // ── On page load: check if notes exist ──
     window.addEventListener("load", function() {
         const topicId = document.getElementById("topicId").value;
         fetch('/notes/topic/' + topicId)
@@ -758,8 +856,8 @@
             .then(data => {
                 if (data && data.trim() !== "" && data.trim() !== "<p><br></p>") {
                     document.getElementById("notesButtonText").innerText = "Resume Notes";
-                    const btn = document.getElementById("prepareNotesBtn");
-                    btn.innerHTML = '<i class="bi bi-journal-check"></i> Resume Notes';
+                    document.getElementById("prepareNotesBtn").innerHTML =
+                        '<i class="bi bi-journal-check"></i> Resume Notes';
                 }
             });
     });

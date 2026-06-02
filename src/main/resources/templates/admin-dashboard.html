@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
@@ -45,7 +45,7 @@
             transition: all 0.18s;
             display: flex; flex-direction: column; align-items: center; gap: 14px;
         }
-        .tile:hover { transform: translateY(-4px); border-color: var(--primary); color: var(--primary); box-shadow: 0 8px 28px rgba(22,163,127,0.12); }
+        .tile:hover { transform: translateY(-4px); border-color: var(--primary); color: var(--primary); box-shadow: 0 8px 28px rgba(79,70,229,0.12); }
 
         .tile-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
         .icon-green  { background: var(--primary-light); color: var(--primary); }
@@ -57,6 +57,13 @@
 
         .tile-label { font-size: 15px; font-weight: 700; }
         .tile-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+        /* ── PAGE BANNER ── */
+        .page-banner { background: url('/images/banner2.jpg') center/cover no-repeat; position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .page-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(55,48,163,0.82)); }
+        .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
+        .page-banner-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; letter-spacing: -0.3px; }
+        .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }
 
         @media (max-width: 600px) {
             .topbar-nav { display: none; }
@@ -85,6 +92,14 @@
 </header>
 
 <div th:replace="fragments/banner :: learningBanner"></div>
+
+<!-- PAGE BANNER -->
+<div class="page-banner">
+    <div class="page-banner-content">
+        <div class="page-banner-title"><i class="bi bi-speedometer2"></i> Admin Dashboard</div>
+        <div class="page-banner-sub">Manage users, topics, subjects and system operations</div>
+    </div>
+</div>
 
 <div class="page-wrap">
 

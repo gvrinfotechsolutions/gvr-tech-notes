@@ -4,6 +4,8 @@
     <title>Add Topic — GVR_T_Notes</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
@@ -85,6 +87,52 @@
         .hint { font-size: 12px; color: var(--text-muted); margin-top: 6px; background: #f8fafc; padding: 8px 12px; border-radius: var(--radius-sm); border-left: 3px solid var(--primary-light); }
         .hint code { font-family: 'JetBrains Mono', monospace; background: #e9ecef; padding: 1px 5px; border-radius: 4px; color: #7c3aed; font-size: 11px; }
 
+        /* ── AI GENERATE PANEL ── */
+        .ai-panel {
+            background: linear-gradient(135deg, #f0fdf4, #e6f7f2);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        .ai-panel-title {
+            font-size: 15px; font-weight: 800; color: var(--primary-dark);
+            display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+        }
+        .ai-panel-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+        .ai-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+        .ai-controls .form-group { margin-bottom: 0; flex: 1; min-width: 180px; }
+        .btn-generate {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff; border: none; border-radius: var(--radius-sm);
+            padding: 11px 22px; font-size: 14px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(22,163,127,0.3);
+        }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(22,163,127,0.4); }
+        .btn-generate:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .ai-status {
+            margin-top: 14px; padding: 10px 14px; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 600; display: none; align-items: center; gap: 8px;
+        }
+        .ai-status.loading { background: #fff7ed; color: #92400e; border: 1px solid #fde68a; display: flex; }
+        .ai-status.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; }
+        .ai-status.error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: flex; }
+
+        .ai-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--primary); color: #fff;
+            font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+            padding: 2px 8px; border-radius: 10px; text-transform: uppercase;
+            margin-left: 8px; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { display: inline-block; animation: spin 1s linear infinite; }
+
         .form-actions { display: flex; gap: 12px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); flex-wrap: wrap; }
         .btn-primary { display: inline-flex; align-items: center; gap: 7px; background: var(--primary); color: #fff; padding: 11px 22px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s; }
         .btn-primary:hover { background: var(--primary-dark); }
@@ -131,6 +179,48 @@
         </div>
 
         <form th:action="@{/saveTopic}" th:object="${topic}" method="post">
+
+            <!-- ✨ AI CONTENT GENERATOR PANEL -->
+            <div class="ai-panel">
+                <div class="ai-panel-title">
+                    <i class="bi bi-stars"></i> AI Content Generator
+                    <span class="ai-badge">✨ Gemini AI</span>
+                </div>
+                <div class="ai-panel-sub">
+                    Enter the topic title and subject below, select a content type, then click Generate.
+                    All fields will be auto-filled with interview-ready content in seconds.
+                </div>
+                <div class="ai-controls">
+                    <div class="form-group">
+                        <label>Topic Title for AI</label>
+                        <input type="text" id="aiTopicTitle"
+                               placeholder="e.g. Spring Boot Bean Lifecycle, HashMap vs ConcurrentHashMap">
+                    </div>
+                    <div class="form-group" style="max-width:200px;">
+                        <label>Subject</label>
+                        <select id="aiSubject">
+                            <option value="">— Select —</option>
+                            <option th:each="sub : ${subjects}"
+                                    th:value="${sub.name}"
+                                    th:text="${sub.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="max-width:200px;">
+                        <label>Content Type</label>
+                        <select id="aiContentType">
+                            <option value="CONCEPT">📘 Concept Deep Dive</option>
+                            <option value="COMPARISON">⚖️ Comparison</option>
+                            <option value="CODE_PATTERN">💻 Code Pattern</option>
+                            <option value="SCENARIO">🏗️ Scenario / System Design</option>
+                            <option value="CHEAT_SHEET">📋 Cheat Sheet</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn-generate" id="generateBtn" onclick="generateContent()">
+                        <i class="bi bi-stars"></i> Generate with AI
+                    </button>
+                </div>
+                <div class="ai-status" id="aiStatus"></div>
+            </div>
 
             <div class="form-group">
                 <label>Subject</label>
@@ -204,6 +294,111 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/clike/clike.min.js"></script>
 
 <script>
+    // ── CSRF ──
+    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    // ── AI Content Generator ──
+    async function generateContent() {
+        const topicTitle  = document.getElementById('aiTopicTitle').value.trim();
+        const subject     = document.getElementById('aiSubject').value.trim();
+        const contentType = document.getElementById('aiContentType').value;
+
+        if (!topicTitle) {
+            showAiStatus('error', '⚠️ Please enter a topic title before generating.');
+            return;
+        }
+        if (!subject) {
+            showAiStatus('error', '⚠️ Please select a subject before generating.');
+            return;
+        }
+
+        const btn = document.getElementById('generateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spin">⟳</span> Generating...';
+        showAiStatus('loading', '🤖 Calling Gemini AI... This takes 5-15 seconds. Please wait.');
+
+        try {
+            const res = await fetch('/admin/generate-content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({ topicTitle, subject, contentType })
+            });
+
+            const data = await res.json();
+
+            if (data.error) {
+                showAiStatus('error', '❌ ' + data.error);
+                return;
+            }
+
+            // ── Auto-fill all form fields ──
+
+            // 1. Topic title
+            const titleInput = document.querySelector('input[name="title"]');
+            if (titleInput && !titleInput.value) titleInput.value = topicTitle;
+
+            // 2. Markdown content via EasyMDE
+            if (data.markdownContent) {
+                easyMDE.value(data.markdownContent);
+            }
+
+            // 3. Code snippet via CodeMirror
+            if (data.codeSnippet) {
+                codeEditor.setValue(data.codeSnippet);
+            }
+
+            // 4. Code language dropdown
+            if (data.codeLanguage) {
+                const langSelect = document.querySelector('select[name="codeLanguage"]');
+                if (langSelect) langSelect.value = data.codeLanguage;
+            }
+
+            // 5. Tags
+            if (data.tags) {
+                const tagsInput = document.querySelector('input[name="tags"]');
+                if (tagsInput) tagsInput.value = data.tags;
+            }
+
+            // 6. Subject dropdown — sync with AI subject selection
+            const subjectSelect = document.querySelector('select[name="subject.id"]');
+            if (subjectSelect && subject) {
+                Array.from(subjectSelect.options).forEach(opt => {
+                    if (opt.text.toLowerCase().includes(subject.toLowerCase())) {
+                        subjectSelect.value = opt.value;
+                    }
+                });
+            }
+
+            showAiStatus('success',
+                '✅ Content generated successfully! Review and edit as needed, then save.');
+
+            // Scroll down to content
+            document.querySelector('.EasyMDEContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            showAiStatus('error', '❌ Network error. Please check your connection and try again.');
+            console.error(err);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-stars"></i> Generate with AI';
+        }
+    }
+
+    function showAiStatus(type, message) {
+        const el = document.getElementById('aiStatus');
+        el.className = 'ai-status ' + type;
+        el.innerHTML = message;
+    }
+
+    // Allow Enter key in AI title input to trigger generate
+    document.getElementById('aiTopicTitle').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); generateContent(); }
+    });
+
     var easyMDE = new EasyMDE({
         element: document.getElementById('contentTextarea'),
         spellChecker: false,

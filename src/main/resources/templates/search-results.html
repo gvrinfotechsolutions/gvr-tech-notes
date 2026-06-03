@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Search Results — GVR_T_Notes</title>
+    <title th:text="${totalResults + ' result(s) for &quot;' + keyword + '&quot; — GVR_T_Notes'}">Search Results — GVR_T_Notes</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
@@ -73,8 +73,8 @@
         .page-btn.disabled { opacity: 0.4; pointer-events: none; }
 
         /* ── PAGE BANNER ── */
-        .page-banner { background: url('/images/banner2.jpg') center/cover no-repeat; position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .page-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(55,48,163,0.82)); }
+        .page-banner { background: linear-gradient(135deg, #0369a1, #0284c7 55%, #0ea5e9); position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .page-banner::before { display: none; }
         .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
         .page-banner-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; letter-spacing: -0.3px; }
         .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }
@@ -98,7 +98,7 @@
     <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> Home</a>
-        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/topics" style="background:var(--primary-light);color:var(--primary);font-weight:700;"><i class="bi bi-grid"></i> Topics</a>
     </nav>
     <form th:action="@{/logout}" method="post" style="margin:0;">
         <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
@@ -152,9 +152,35 @@
                 <span class="result-type"><i class="bi bi-journal-text"></i> Knowledge Article</span>
             </div>
             <div class="result-title" th:text="${topic.title}"></div>
-            <div class="result-preview" th:text="${#strings.length(topic.content) > 200 ? #strings.substring(topic.content,0,200) + '…' : topic.content}"></div>
+            <div class="result-preview"
+                 th:text="${#strings.length(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(topic.content, '#', ''),
+                     '**', ''), '*', ''), '`', ''), '_', '')
+                 ) > 200
+                 ? #strings.substring(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(topic.content, '#', ''),
+                     '**', ''), '*', ''), '`', ''), '_', ''), 0, 200) + '…'
+                 : #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(
+                     #strings.replace(topic.content, '#', ''),
+                     '**', ''), '*', ''), '`', ''), '_', '')}">
+            </div>
             <div class="result-tags" th:if="${topic.tags != null and !#strings.isEmpty(topic.tags)}">
-                <span class="tag" th:each="tag : ${#strings.arraySplit(topic.tags, ',')}" th:text="${#strings.trim(tag)}"></span>
+                <a class="tag"
+                   th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
+                   th:text="${#strings.trim(tag)}"
+                   th:href="@{/searchTopics(keyword=${#strings.trim(tag)})}"
+                   style="text-decoration:none;cursor:pointer;"></a>
             </div>
             <div class="result-footer">
                 <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-view">

@@ -67,7 +67,7 @@ public class SecurityConfig {
 
 				// CSRF is enabled; JS fetch calls must include the X-CSRF-TOKEN header
 				.csrf(csrf -> csrf
-						.ignoringRequestMatchers("/trackView/**"));
+						.ignoringRequestMatchers("/trackView/**", "/completeTopic/ajax/**"));
 
 		return http.build();
 	}

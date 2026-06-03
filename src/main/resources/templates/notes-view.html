@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Note View — GVR_T_Notes</title>
@@ -9,7 +9,7 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
             --accent: #f59e0b; --accent-light: #fef3c7;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
@@ -110,8 +110,8 @@
         .btn-primary:hover { background: var(--primary-dark); }
 
         /* ── PAGE BANNER ── */
-        .page-banner { background: url('/images/banner2.jpg') center/cover no-repeat; position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .page-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(55,48,163,0.82)); }
+        .page-banner { background: linear-gradient(135deg, #92400e, #b45309 55%, #d97706); position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .page-banner::before { display: none; }
         .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
         .page-banner-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; letter-spacing: -0.3px; }
         .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }

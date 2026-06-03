@@ -20,7 +20,10 @@ public class Topic {
     // NEW FIELD
     @Column(length = 10000)
     private String codeSnippet;
-    
+
+    @Column(length = 50)
+    private String codeLanguage;
+
     @Column(length = 1000)
     private String tags;
 

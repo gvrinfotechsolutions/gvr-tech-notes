@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -16,9 +16,9 @@
 
     <style>
         :root {
-            --primary:       #4f46e5;
-            --primary-light: #eef2ff;
-            --primary-dark:  #3730a3;
+            --primary:       #16a37f;
+            --primary-light: #e6f7f2;
+            --primary-dark:  #0e7a5f;
             --accent:        #f59e0b;
             --accent-light:  #fef3c7;
             --bg:            #f4f6f9;
@@ -82,7 +82,30 @@
             transition: all 0.15s;
         }
         .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .topbar-nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
         .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .btn-dark-toggle { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); color: var(--text-muted); background: var(--bg); cursor: pointer; transition: all 0.15s; }
+
+        /* ── DARK MODE ── */
+        .dark body { background: #111827; color: #f3f4f6; }
+        .dark .topbar, .dark .content-card, .dark .notes-card { background: #1f2937 !important; border-color: #374151 !important; }
+        .dark .content-header { background: linear-gradient(135deg, #1e1b4b, #312e81 55%, #3730a3) !important; }
+        .dark .md { color: #d1d5db; }
+        .dark .md h1, .dark .md h2, .dark .md h4, .dark .md strong { color: #f3f4f6; }
+        .dark .md h3 { color: #6ee7b7; }
+        .dark .md blockquote { background: #1e293b; color: #a5b4fc; }
+        .dark .md table th { background: var(--primary-dark); }
+        .dark .md table td { border-color: #374151; }
+        .dark .md table tr:nth-child(even) td { background: #1e293b; }
+        .dark .md table tr:hover td { background: #2d3748; }
+        .dark .topbar-nav a { color: #9ca3af; }
+        .dark .btn-action.dark { background: #374151; }
+        .dark .notes-header { background: linear-gradient(135deg,#451a03,#78350f) !important; }
+        .dark .notes-card { background: #1c1a0e !important; border-color: #854d0e !important; }
+
+        /* ── KEYBOARD HINTS FOOTER ── */
+        .kb-footer { text-align: center; padding: 12px; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+        .kb-key { display: inline-block; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; margin: 0 2px; }
         .btn-logout {
             font-size: 13px; font-weight: 600;
             padding: 6px 14px; border-radius: var(--radius-sm);
@@ -141,24 +164,21 @@
         .content-header {
             padding: 28px 36px 24px;
             border-bottom: 1px solid var(--border);
-            background: url('/images/banner3.jpg') center/cover no-repeat;
+            background: linear-gradient(135deg, #312e81, #4338ca 55%, #4f46e5);
             position: relative;
             overflow: hidden;
         }
-        .content-header::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(79,70,229,0.91), rgba(55,48,163,0.86));
-        }
+        .content-header::before { display: none; }
         .content-header > * { position: relative; z-index: 1; }
         .content-title { color: #fff !important; }
         .subject-chip { background: rgba(255,255,255,0.18) !important; color: #e0e7ff !important; }
         .tag-chip { background: rgba(255,255,255,0.12) !important; color: #c7d2fe !important; border-color: rgba(255,255,255,0.22) !important; }
-        .stat-item { background: rgba(255,255,255,0.10) !important; border-color: rgba(255,255,255,0.16) !important; }
-        .stat-label { color: rgba(255,255,255,0.65) !important; }
-        .stat-value, .stat-date { color: #fff !important; }
-        .stat-icon { color: #c7d2fe !important; }
+
+        /* ── STICKY NOTE STAT CARDS ── */
+        .stat-item { background: #fef08a !important; border-color: #eab308 !important; border-width: 1.5px !important; box-shadow: 2px 3px 0 rgba(161,130,9,0.28) !important; }
+        .stat-label { color: #92400e !important; }
+        .stat-value, .stat-date { color: #78350f !important; }
+        .stat-icon { color: #b45309 !important; }
 
         .meta-row {
             display: flex;
@@ -563,7 +583,7 @@
             letter-spacing: 0.3px;
         }
         .copy-btn:hover { background: rgba(255,255,255,0.2); color: #e5e7eb; }
-        .copy-btn.copied { background: rgba(79,70,229,0.3); color: #a5b4fc; border-color: #a5b4fc; }
+        .copy-btn.copied { background: rgba(22,163,127,0.3); color: #6ee7b7; border-color: #6ee7b7; }
 
         /* ══════════════════════════════
            MERMAID DIAGRAMS
@@ -646,9 +666,10 @@
     </a>
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> Home</a>
-        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/topics" class="active"><i class="bi bi-grid"></i> Topics</a>
     </nav>
     <div class="topbar-right">
+        <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
         <form th:action="@{/logout}" method="post" style="margin:0;">
             <button type="submit" class="btn-logout">
                 <i class="bi bi-box-arrow-right"></i> Logout
@@ -682,8 +703,10 @@
             <!-- Subject + Tags -->
             <div class="meta-row">
                 <span class="subject-chip" th:text="${topic.subject.name}"></span>
-                <span th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
-                      class="tag-chip" th:text="${#strings.trim(tag)}"></span>
+                <a th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
+                   th:href="@{/searchTopics(keyword=${#strings.trim(tag)})}"
+                   class="tag-chip" th:text="${#strings.trim(tag)}"
+                   style="text-decoration:none;cursor:pointer;"></a>
             </div>
 
             <!-- Title -->
@@ -720,9 +743,12 @@
                  th:if="${topic.codeSnippet != null && !#strings.isEmpty(topic.codeSnippet)}">
                 <div class="snippet-title">
                     <i class="bi bi-code-slash" style="color:var(--primary)"></i>
-                    Java Code Example
+                    <span th:text="${topic.codeLanguage != null && !#strings.isEmpty(topic.codeLanguage)}
+                        ? (${#strings.toUpperCase(#strings.substring(topic.codeLanguage,0,1))} + ${#strings.substring(topic.codeLanguage,1)} + ' Code Example')
+                        : 'Code Example'"></span>
                 </div>
-                <pre><code class="language-java" th:text="${topic.codeSnippet}"></code></pre>
+                <pre><code th:classappend="${topic.codeLanguage != null && !#strings.isEmpty(topic.codeLanguage)} ? 'language-' + ${topic.codeLanguage} : 'language-none'"
+                           th:text="${topic.codeSnippet}"></code></pre>
             </div>
         </div>
 
@@ -801,6 +827,14 @@
 
 <!-- BACK TO TOP -->
 <button id="backToTopBtn"><i class="bi bi-arrow-up"></i> Top</button>
+
+<!-- KEYBOARD HINTS FOOTER -->
+<div class="kb-footer">
+    <span class="kb-key">E</span> Edit &nbsp;·&nbsp;
+    <span class="kb-key">B</span> Back to Topics &nbsp;·&nbsp;
+    <span class="kb-key">N</span> Open Notes &nbsp;·&nbsp;
+    <span class="kb-key">T</span> Back to Top
+</div>
 
 <!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
@@ -977,6 +1011,33 @@
     });
     topBtn.addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // ── Dark mode ──
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        const on = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', on);
+        document.getElementById('darkToggle').innerHTML = on ? '☀️ <span>Light</span>' : '🌙 <span>Dark</span>';
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkToggle').innerHTML = '☀️ <span>Light</span>';
+    }
+
+    // ── Keyboard shortcuts ──
+    document.addEventListener('keydown', e => {
+        if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName) || e.target.isContentEditable) return;
+        if (e.key === 'b' || e.key === 'B') window.location.href = '/topics';
+        if (e.key === 'e' || e.key === 'E') {
+            const editBtn = document.querySelector('.btn-action.warn');
+            if (editBtn) window.location.href = editBtn.href;
+        }
+        if (e.key === 't' || e.key === 'T') window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (e.key === 'n' || e.key === 'N') {
+            const notesBtn = document.getElementById('prepareNotesBtn');
+            if (notesBtn) notesBtn.click();
+        }
     });
 </script>
 

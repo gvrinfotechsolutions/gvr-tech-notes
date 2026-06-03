@@ -93,6 +93,10 @@ public class UserService {
                 .findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
+
+    public long countAll() {
+        return userRepository.count();
+    }
     		
 
 }

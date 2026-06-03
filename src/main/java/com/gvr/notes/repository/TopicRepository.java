@@ -29,4 +29,7 @@ public interface TopicRepository
             String tags,
             Pageable pageable);
 
+    List<Topic> findTop5ByLastViewedAtNotNullOrderByLastViewedAtDesc();
+
+    long count();
 }

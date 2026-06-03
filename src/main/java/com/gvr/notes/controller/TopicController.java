@@ -130,7 +130,7 @@ public class TopicController {
     @GetMapping("/subjectTopics/{id}")
     public String subjectTopics(@PathVariable Long id,
                                  @RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "5") int size,
+                                 @RequestParam(defaultValue = "10") int size,
                                  Model model, Principal principal) {
         size = Math.min(size, MAX_PAGE_SIZE);
 
@@ -172,7 +172,11 @@ public class TopicController {
     }
 
     @GetMapping("/admin")
-    public String adminDashboard() {
+    public String adminDashboard(Model model) {
+        model.addAttribute("pendingCount", userService.getPendingUsers().size());
+        model.addAttribute("totalTopics", topicService.countAll());
+        model.addAttribute("totalSubjects", subjectService.getAllSubjects().size());
+        model.addAttribute("totalUsers", userService.countAll());
         return "admin-dashboard";
     }
 
@@ -192,6 +196,15 @@ public class TopicController {
         Topic topic = topicService.getTopicById(id);
         topicProgressService.markTopicComplete(user, topic);
         return subjectId != null ? "redirect:/subjectTopics/" + subjectId : "redirect:/topics";
+    }
+
+    @PostMapping("/completeTopic/ajax/{id}")
+    @ResponseBody
+    public Map<String, String> completeTopicAjax(@PathVariable Long id, Principal principal) {
+        User user = userService.findByUsername(principal.getName());
+        Topic topic = topicService.getTopicById(id);
+        topicProgressService.markTopicComplete(user, topic);
+        return Map.of("status", "completed");
     }
 
     @GetMapping("/resetProgress/{subjectId}")

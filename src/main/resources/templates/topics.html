@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
             --accent: #f59e0b; --accent-light: #fef3c7;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
@@ -98,6 +98,18 @@
         .btn-icon-check { background: var(--primary-light); color: var(--primary); }
         .btn-icon-check:hover { background: var(--primary); color: #fff; }
 
+        /* TOPIC TAGS + VIEWS */
+        .topic-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+        .topic-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; text-decoration: none; transition: background 0.12s; }
+        .topic-tag:hover { background: #ede9fe; }
+        .view-count { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+        /* FILTER BAR */
+        .filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-btn { padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+        .filter-btn:hover, .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .filter-btn.active-warn { background: var(--accent); color: #1c1917; border-color: var(--accent); }
+
         /* EMPTY SUBJECT */
         .empty-subject { padding: 32px 20px; text-align: center; }
         .empty-subject p { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
@@ -136,10 +148,10 @@
         .dark .sub-link .count { background: #374151; color: #9ca3af; }
 
         /* ── PAGE BANNER ── */
-        .page-banner { background: url('/images/banner2.jpg') center/cover no-repeat; position: relative; height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .page-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(55,48,163,0.82)); }
+        .page-banner { background: linear-gradient(135deg, #4338ca, #3730a3 55%, #312e81); position: relative; height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .page-banner::before { display: none; }
         .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
-        .page-banner-title { font-size: clamp(20px, 3vw, 28px); font-weight: 800; letter-spacing: -0.3px; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .page-banner-title { font-size: clamp(20px, 3vw, 28px); font-weight: 800; letter-spacing: -0.3px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
         .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }
 
         /* ── RESPONSIVE ── */
@@ -163,7 +175,7 @@
     <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> Home</a>
-        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/topics" class="active"><i class="bi bi-grid"></i> Topics</a>
         <a href="/admin" sec:authorize="hasRole('ADMIN')"><i class="bi bi-speedometer2"></i> Admin</a>
     </nav>
     <div class="topbar-right">
@@ -207,6 +219,14 @@
                 <input type="text" name="keyword" placeholder="Search topics, tags, keywords...">
                 <button type="submit"><i class="bi bi-search"></i> Search</button>
             </form>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <span style="font-size:12px;font-weight:700;color:var(--text-muted);">Show:</span>
+            <button class="filter-btn active" id="filterAll" onclick="filterTopics('all')">All</button>
+            <button class="filter-btn" id="filterPending" onclick="filterTopics('pending')"><i class="bi bi-circle"></i> Not Started</button>
+            <button class="filter-btn" id="filterDone" onclick="filterTopics('done')"><i class="bi bi-check-circle-fill"></i> Completed</button>
         </div>
 
         <!-- PAGE SIZE CONTROL -->
@@ -284,28 +304,57 @@
 
                     <!-- TOPIC LIST -->
                     <div class="topic-list">
-                        <div th:each="topic : ${entry.value}" class="topic-row">
-                            <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="topic-link">
-                                <i class="bi bi-journal-text" style="color:var(--primary);flex-shrink:0;"></i>
-                                <span th:text="${topic.title}"></span>
-                            </a>
+                        <div th:each="topic : ${entry.value}"
+                             class="topic-row"
+                             th:classappend="${completedTopicsMap != null and completedTopicsMap[topic.id]} ? 'topic-done' : 'topic-pending'"
+                             th:attr="data-topic-id=${topic.id}">
+                            <div style="min-width:0;flex:1;">
+                                <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="topic-link">
+                                    <i class="bi bi-journal-text" style="color:var(--primary);flex-shrink:0;"></i>
+                                    <span th:text="${topic.title}"></span>
+                                </a>
+                                <div class="topic-tags" th:if="${topic.tags != null and !#strings.isEmpty(topic.tags)}">
+                                    <a th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
+                                       th:href="@{/searchTopics(keyword=${#strings.trim(tag)})}"
+                                       th:text="${#strings.trim(tag)}"
+                                       class="topic-tag"></a>
+                                    <span class="view-count" th:if="${topic.viewCount > 0}">
+                                        <i class="bi bi-eye"></i> <span th:text="${topic.viewCount}"></span>
+                                    </span>
+                                </div>
+                                <div class="topic-tags" th:if="${topic.tags == null or #strings.isEmpty(topic.tags)}">
+                                    <span class="view-count" th:if="${topic.viewCount > 0}">
+                                        <i class="bi bi-eye"></i> <span th:text="${topic.viewCount}"></span>
+                                    </span>
+                                </div>
+                            </div>
                             <div class="topic-row-right">
                                 <!-- COMPLETED BADGE -->
-                                <span th:if="${completedTopicsMap != null and completedTopicsMap[topic.id]}" class="badge-done">
+                                <span th:if="${completedTopicsMap != null and completedTopicsMap[topic.id]}"
+                                      class="badge-done" th:id="'badge-' + ${topic.id}">
+                                    <i class="bi bi-check-lg"></i> Done
+                                </span>
+                                <span th:if="${completedTopicsMap == null or !completedTopicsMap[topic.id]}"
+                                      class="badge-done" th:id="'badge-' + ${topic.id}" style="display:none;">
                                     <i class="bi bi-check-lg"></i> Done
                                 </span>
                                 <!-- VIEW -->
                                 <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-view" title="View"><i class="bi bi-eye"></i></a>
                                 <!-- EDIT -->
                                 <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-edit" title="Edit" sec:authorize="hasRole('ADMIN')"><i class="bi bi-pencil"></i></a>
-                                <!-- MARK COMPLETE -->
-                                <a th:if="${completedTopicsMap == null or !completedTopicsMap[topic.id]}"
-                                   th:href="${selectedSubjectId != null}
-                                       ? @{/completeTopic/{id}(id=${topic.id},subjectId=${selectedSubjectId})}
-                                       : @{/completeTopic/{id}(id=${topic.id})}"
-                                   class="btn-icon btn-icon-check" title="Mark Complete">
+                                <!-- MARK COMPLETE (AJAX) -->
+                                <button th:if="${completedTopicsMap == null or !completedTopicsMap[topic.id]}"
+                                        th:id="'check-' + ${topic.id}"
+                                        th:attr="data-id=${topic.id}"
+                                        class="btn-icon btn-icon-check" title="Mark Complete"
+                                        onclick="markComplete(this)">
                                     <i class="bi bi-check-lg"></i>
-                                </a>
+                                </button>
+                                <button th:if="${completedTopicsMap != null and completedTopicsMap[topic.id]}"
+                                        th:id="'check-' + ${topic.id}"
+                                        class="btn-icon btn-icon-check" style="display:none;">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -360,6 +409,7 @@
 </div>
 
 <script>
+    // ── Dark mode ──
     function toggleDark() {
         document.documentElement.classList.toggle('dark');
         const on = document.documentElement.classList.contains('dark');
@@ -369,6 +419,52 @@
     if (localStorage.getItem('darkMode') === 'true') {
         document.documentElement.classList.add('dark');
         document.getElementById('darkToggle').innerHTML = '☀️ <span>Light</span>';
+    }
+
+    // ── Completion filter ──
+    function filterTopics(mode) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('filter' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+        document.querySelectorAll('.topic-row').forEach(row => {
+            const done = row.classList.contains('topic-done');
+            if (mode === 'all') row.style.display = '';
+            else if (mode === 'done') row.style.display = done ? '' : 'none';
+            else row.style.display = !done ? '' : 'none';
+        });
+    }
+
+    // ── AJAX mark complete ──
+    function markComplete(btn) {
+        const id = btn.getAttribute('data-id');
+        fetch('/completeTopic/ajax/' + id, { method: 'POST' })
+            .then(r => r.json())
+            .then(() => {
+                const row = btn.closest('.topic-row');
+                row.classList.remove('topic-pending');
+                row.classList.add('topic-done');
+                btn.style.display = 'none';
+                const badge = document.getElementById('badge-' + id);
+                if (badge) badge.style.display = 'inline-flex';
+                // update progress bar
+                updateProgress(row.closest('.subject-card'));
+            });
+    }
+
+    function updateProgress(card) {
+        if (!card) return;
+        const total = card.querySelectorAll('.topic-row').length;
+        const done  = card.querySelectorAll('.topic-done').length;
+        const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+        const pctEl = card.querySelector('.progress-pct span');
+        const cntEl = card.querySelector('.progress-counts span:first-child');
+        const fill  = card.querySelector('.progress-fill');
+        if (pctEl) pctEl.textContent = pct;
+        if (cntEl) cntEl.textContent = done;
+        if (fill) {
+            fill.style.width = pct + '%';
+            fill.className = 'progress-fill ' +
+                (pct < 40 ? 'fill-danger' : pct < 80 ? 'fill-warning' : 'fill-success');
+        }
     }
 </script>
 

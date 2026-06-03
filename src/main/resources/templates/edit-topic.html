@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Edit Topic — GVR_T_Notes</title>
@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/theme/dracula.min.css">
     <style>
         :root {
-            --primary:#4f46e5;--primary-light:#eef2ff;--primary-dark:#3730a3;
+            --primary:#16a37f;--primary-light:#e6f7f2;--primary-dark:#0e7a5f;
             --bg:#f4f6f9;--surface:#fff;--border:#e5e9ef;
             --text:#1e2330;--text-muted:#6b7280;
             --shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 4px 16px rgba(0,0,0,.08);
@@ -38,7 +38,7 @@
         .card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:0;overflow:hidden;}
 
         .card-header{display:flex;align-items:center;gap:12px;padding:28px 28px 24px;background:url('/images/banner1.jpg') center/cover no-repeat;position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
-        .card-header::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,70,229,0.90),rgba(55,48,163,0.85));}
+        .card-header::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(22,163,127,0.90),rgba(14,122,95,0.85));}
         .card-header>*{position:relative;z-index:1;}
         .card-icon{width:44px;height:44px;background:rgba(255,255,255,0.20);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
         .card-title{font-size:22px;font-weight:800;color:#fff;}
@@ -174,12 +174,32 @@
                 </div>
             </div>
 
-            <!-- CODE SNIPPET (CodeMirror Java) -->
+            <!-- CODE LANGUAGE SELECTOR -->
             <div class="form-group">
-                <label>Code Snippet <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional — Java, syntax-highlighted separately)</span></label>
+                <label>Code Snippet Language <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+                <select th:field="*{codeLanguage}">
+                    <option value="">— None / Plain Text —</option>
+                    <option value="java">Java</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="sql">SQL</option>
+                    <option value="bash">Bash / Shell</option>
+                    <option value="xml">XML</option>
+                    <option value="json">JSON</option>
+                    <option value="yaml">YAML</option>
+                    <option value="go">Go</option>
+                    <option value="kotlin">Kotlin</option>
+                    <option value="scala">Scala</option>
+                </select>
+            </div>
+
+            <!-- CODE SNIPPET (CodeMirror) -->
+            <div class="form-group">
+                <label>Code Snippet <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional — syntax-highlighted separately)</span></label>
                 <textarea th:field="*{codeSnippet}" id="codeTextarea" style="display:none;"></textarea>
                 <div id="codeEditor"></div>
-                <div class="hint">Plain Java code — no markdown needed. Syntax highlighted automatically on the view page.</div>
+                <div class="hint">Code snippet — syntax highlighted automatically on the view page.</div>
             </div>
 
             <div class="form-actions">

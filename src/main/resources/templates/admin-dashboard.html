@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Admin Dashboard — GVR_T_Notes</title>
@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
@@ -45,7 +45,7 @@
             transition: all 0.18s;
             display: flex; flex-direction: column; align-items: center; gap: 14px;
         }
-        .tile:hover { transform: translateY(-4px); border-color: var(--primary); color: var(--primary); box-shadow: 0 8px 28px rgba(79,70,229,0.12); }
+        .tile:hover { transform: translateY(-4px); border-color: var(--primary); color: var(--primary); box-shadow: 0 8px 28px rgba(22,163,127,0.12); }
 
         .tile-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
         .icon-green  { background: var(--primary-light); color: var(--primary); }
@@ -57,10 +57,19 @@
 
         .tile-label { font-size: 15px; font-weight: 700; }
         .tile-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+        .tile-badge { display: inline-flex; align-items: center; justify-content: center; background: #ef4444; color: #fff; font-size: 11px; font-weight: 800; min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px; margin-top: 4px; }
+        .tile-count { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 4px; }
+
+        /* STATS ROW */
+        .stats-row { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+        .stat-card { background: var(--surface); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 14px; flex: 1; min-width: 160px; }
+        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+        .stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 2px; }
 
         /* ── PAGE BANNER ── */
-        .page-banner { background: url('/images/banner2.jpg') center/cover no-repeat; position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .page-banner::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(79,70,229,0.88), rgba(55,48,163,0.82)); }
+        .page-banner { background: linear-gradient(135deg, #0f172a, #1e293b 55%, #0f172a); position: relative; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .page-banner::before { display: none; }
         .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
         .page-banner-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; letter-spacing: -0.3px; }
         .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }
@@ -108,6 +117,38 @@
         <p class="page-subtitle">Manage users, topics, subjects, and system operations.</p>
     </div>
 
+    <!-- STATS SUMMARY -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;color:#92400e;"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" th:text="${totalUsers}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--primary-light);color:var(--primary);"><i class="bi bi-journal-richtext"></i></div>
+            <div>
+                <div class="stat-label">Total Topics</div>
+                <div class="stat-value" th:text="${totalTopics}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="bi bi-folder2-open"></i></div>
+            <div>
+                <div class="stat-label">Subjects</div>
+                <div class="stat-value" th:text="${totalSubjects}">0</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;color:#ef4444;"><i class="bi bi-person-exclamation"></i></div>
+            <div>
+                <div class="stat-label">Pending Approvals</div>
+                <div class="stat-value" th:text="${pendingCount}">0</div>
+            </div>
+        </div>
+    </div>
+
     <div class="grid">
 
         <a href="/admin/pending-users" class="tile">
@@ -115,6 +156,8 @@
             <div>
                 <div class="tile-label">Pending Users</div>
                 <div class="tile-desc">Review and approve new account requests</div>
+                <div th:if="${pendingCount > 0}" class="tile-badge" th:text="${pendingCount}"></div>
+                <div th:if="${pendingCount == 0}" class="tile-count">All caught up</div>
             </div>
         </a>
 
@@ -123,6 +166,7 @@
             <div>
                 <div class="tile-label">View Topics</div>
                 <div class="tile-desc">Browse and manage all knowledge topics</div>
+                <div class="tile-count" th:text="${totalTopics} + ' topics'"></div>
             </div>
         </a>
 
@@ -139,6 +183,7 @@
             <div>
                 <div class="tile-label">Subjects</div>
                 <div class="tile-desc">Manage subject categories and descriptions</div>
+                <div class="tile-count" th:text="${totalSubjects} + ' subjects'"></div>
             </div>
         </a>
 

@@ -71,6 +71,14 @@ public class TopicService {
         return topicRepository.countBySubjectId(subjectId);
     }
 
+    public long countAll() {
+        return topicRepository.count();
+    }
+
+    public List<Topic> getRecentlyViewedTopics() {
+        return topicRepository.findTop5ByLastViewedAtNotNullOrderByLastViewedAtDesc();
+    }
+
     public Map<String, Object> getGroupedTopics(int page, int size, String sortBy, String direction) {
         if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
             log.warn("Invalid sortBy field '{}', defaulting to 'title'", sortBy);

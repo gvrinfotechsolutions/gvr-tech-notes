@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5; --primary-light: #eef2ff; --primary-dark: #3730a3;
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
             --accent: #f59e0b; --accent-light: #fef3c7;
             --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
             --text: #1e2330; --text-muted: #6b7280;
@@ -49,7 +49,7 @@
 
         /* ── HERO ── */
         .hero { background: url('/images/banner1.jpg') center/cover no-repeat; position: relative; color: #fff; border-radius: var(--radius); padding: 36px 28px; margin-bottom: 24px; box-shadow: var(--shadow-md); overflow: hidden; }
-        .hero::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(79,70,229,0.90), rgba(55,48,163,0.84)); }
+        .hero::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, rgba(22,163,127,0.90), rgba(14,122,95,0.84)); }
         .hero-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; line-height: 1.3; position: relative; z-index: 1; }
         .hero-sub { font-size: 14px; opacity: 0.88; margin-top: 8px; position: relative; z-index: 1; }
 
@@ -67,7 +67,7 @@
         /* ── SUBJECT GRID ── */
         .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 32px; }
         .subject-card { background: var(--surface); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-md); border: 1.5px solid transparent; transition: all 0.18s; display: flex; flex-direction: column; }
-        .subject-card:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 24px rgba(22,163,127,0.1); }
+        .subject-card:hover { transform: translateY(-3px); border-color: var(--primary); box-shadow: 0 8px 24px rgba(22,163,127,0.12); }
         .subject-card-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
         .subject-card-count { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
         .subject-card-desc { font-size: 13px; color: var(--text-muted); flex: 1; margin-bottom: 16px; line-height: 1.5; }
@@ -82,6 +82,33 @@
         .stat-card { background: var(--surface); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-md); flex: 1; min-width: 140px; text-align: center; }
         .stat-value { font-size: 28px; font-weight: 800; color: var(--primary); }
         .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+
+        /* ── CONTINUE LEARNING ── */
+        .recent-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 32px; }
+        .recent-row::-webkit-scrollbar { height: 4px; }
+        .recent-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .recent-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1.5px solid var(--border); padding: 14px 16px; min-width: 190px; max-width: 210px; flex-shrink: 0; text-decoration: none; color: var(--text); transition: all 0.18s; display: flex; flex-direction: column; gap: 6px; }
+        .recent-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .recent-card-subject { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--primary); }
+        .recent-card-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .recent-card-meta { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+
+        /* ── DARK MODE ── */
+        .dark body { background: #111827; color: #f3f4f6; }
+        .dark .topbar, .dark .sidebar, .dark .subject-card, .dark .form-card, .dark .stat-card, .dark .recent-card, .dark .notes-cta { background: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6 !important; }
+        .dark .sub-link, .dark .subject-card-name { color: #e5e7eb; }
+        .dark .subject-card-desc, .dark .subject-card-count, .dark .stat-label { color: #9ca3af; }
+        .dark .sub-link .count { background: #374151; color: #9ca3af; }
+        .dark input[type="text"], .dark textarea { background: #374151; color: #f3f4f6; border-color: #4b5563; }
+        .dark .topbar-nav a { color: #9ca3af; }
+        .dark .recent-card-title { color: #e5e7eb; }
+
+        /* ── ACTIVE NAV ── */
+        .topbar-nav a.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+
+        /* ── DARK TOGGLE ── */
+        .btn-dark-toggle { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); color: var(--text-muted); background: var(--bg); cursor: pointer; transition: all 0.15s; }
+        .btn-dark-toggle:hover { background: var(--surface); }
 
         /* ── ADD SUBJECT FORM ── */
         .form-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 24px 22px; }
@@ -123,14 +150,17 @@
     </div>
 
     <nav class="topbar-nav">
-        <a href="/"><i class="bi bi-house"></i> <span>Home</span></a>
+        <a href="/" class="active"><i class="bi bi-house"></i> <span>Home</span></a>
         <a href="/topics"><i class="bi bi-grid"></i> <span>Topics</span></a>
         <a href="/admin" sec:authorize="hasRole('ADMIN')"><i class="bi bi-speedometer2"></i> <span>Admin</span></a>
     </nav>
 
-    <form th:action="@{/logout}" method="post" style="margin:0;">
-        <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i></button>
-    </form>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+    </div>
 </header>
 
 <div th:replace="fragments/banner :: learningBanner"></div>
@@ -170,16 +200,33 @@
         <!-- STATS -->
         <div class="stats-row">
             <div class="stat-card">
-                <div class="stat-value" th:text="${subjects.size()}">0</div>
+                <div class="stat-value" th:text="${totalSubjects}">0</div>
                 <div class="stat-label">Subjects</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">∞</div>
-                <div class="stat-label">Learning Never Stops</div>
+                <div class="stat-value" th:text="${totalTopics}">0</div>
+                <div class="stat-label">Total Topics</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">24/7</div>
-                <div class="stat-label">Knowledge Growth</div>
+                <div class="stat-value" th:text="${completedTopicsCount}">0</div>
+                <div class="stat-label">Topics Completed</div>
+            </div>
+        </div>
+
+        <!-- CONTINUE LEARNING -->
+        <div th:if="${recentTopics != null and !recentTopics.isEmpty()}">
+            <div class="section-title"><i class="bi bi-play-circle-fill"></i> Continue Learning</div>
+            <div class="recent-row">
+                <a th:each="rt : ${recentTopics}"
+                   th:href="@{/viewTopic/{id}(id=${rt.id})}"
+                   class="recent-card">
+                    <div class="recent-card-subject" th:text="${rt.subject.name}"></div>
+                    <div class="recent-card-title" th:text="${rt.title}"></div>
+                    <div class="recent-card-meta">
+                        <i class="bi bi-clock-history"></i>
+                        <span th:text="${#temporals.format(rt.lastViewedAt,'dd MMM')}"></span>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -221,5 +268,17 @@
     </main>
 </div>
 
+<script>
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        const on = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', on);
+        document.getElementById('darkToggle').innerHTML = on ? '☀️ <span>Light</span>' : '🌙 <span>Dark</span>';
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkToggle').innerHTML = '☀️ <span>Light</span>';
+    }
+</script>
 </body>
 </html>

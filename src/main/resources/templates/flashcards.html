@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Flashcards — ' + ${topic.title} + ' — GVR_T_Notes'">Flashcards</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --accent: #f59e0b; --accent-light: #fef3c7;
+            --bg: #f0f4f8; --surface: #fff; --border: #e5e9ef;
+            --text: #1e2330; --text-muted: #6b7280;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 20px rgba(0,0,0,0.10);
+            --radius: 18px; --radius-sm: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); min-height: 100vh; }
+
+        /* TOPBAR */
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+        .topbar-logo { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .topbar-nav { display: flex; align-items: center; gap: 4px; }
+        .topbar-nav a { text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: var(--radius-sm); transition: all 0.15s; }
+        .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .btn-dark-toggle { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); color: var(--text-muted); background: var(--bg); cursor: pointer; }
+        .btn-logout { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: var(--radius-sm); border: 1.5px solid #fca5a5; color: #ef4444; background: #fff5f5; cursor: pointer; }
+        .btn-logout:hover { background: #fee2e2; }
+
+        /* PAGE */
+        .page-wrap { max-width: 780px; margin: 0 auto; padding: 28px 20px 60px; }
+
+        /* HEADER */
+        .fc-header { text-align: center; margin-bottom: 32px; }
+        .fc-header-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); margin-bottom: 20px; transition: all 0.15s; }
+        .fc-header-back:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .fc-subject { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--primary); margin-bottom: 6px; }
+        .fc-topic-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .fc-counter { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+
+        /* PROGRESS BAR */
+        .fc-progress-wrap { height: 5px; background: var(--border); border-radius: 5px; margin-bottom: 28px; overflow: hidden; }
+        .fc-progress-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--primary), #34d399); transition: width 0.4s ease; }
+
+        /* EMPTY STATE */
+        .fc-empty { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 56px 24px; text-align: center; }
+        .fc-empty-icon { font-size: 48px; opacity: 0.25; margin-bottom: 14px; }
+        .fc-empty-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .fc-empty-desc { font-size: 14px; color: var(--text-muted); }
+
+        /* FLIP CARD */
+        .fc-scene { width: 100%; perspective: 1200px; margin-bottom: 28px; }
+        .fc-card-wrap { position: relative; width: 100%; min-height: 340px; transform-style: preserve-3d; transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .fc-card-wrap.flipped { transform: rotateY(180deg); }
+        .fc-face { position: absolute; width: 100%; min-height: 340px; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--radius); box-shadow: var(--shadow-md); display: flex; flex-direction: column; padding: 36px 32px; }
+        .fc-front { background: var(--surface); border: 2px solid var(--primary-light); }
+        .fc-back  { background: linear-gradient(135deg, #f0fdf4, #e6f7f2); border: 2px solid var(--primary); transform: rotateY(180deg); }
+        .fc-level { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; padding: 3px 10px; border-radius: 12px; display: inline-block; margin-bottom: 16px; align-self: flex-start; }
+        .level-basic        { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .level-intermediate { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+        .level-advanced     { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .level-general      { background: var(--primary-light); color: var(--primary-dark); border: 1px solid #a7f3d0; }
+        .fc-face-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+        .fc-face-label i { font-size: 13px; color: var(--primary); }
+        .fc-question { font-size: clamp(16px, 2.5vw, 20px); font-weight: 700; color: var(--text); line-height: 1.45; flex: 1; display: flex; align-items: center; }
+        .fc-answer { font-size: 14px; color: #1e3a2f; line-height: 1.7; flex: 1; overflow-y: auto; white-space: pre-wrap; }
+        .fc-hint { font-size: 12px; color: var(--text-muted); margin-top: auto; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.06); text-align: center; }
+
+        /* CONTROLS */
+        .fc-controls { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .btn-ctrl { display: inline-flex; align-items: center; gap: 7px; padding: 11px 22px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all 0.15s; text-decoration: none; }
+        .btn-prev { background: var(--surface); color: var(--text-muted); border: 1.5px solid var(--border); }
+        .btn-prev:hover:not(:disabled) { background: var(--bg); color: var(--text); }
+        .btn-prev:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-flip { background: var(--primary); color: #fff; }
+        .btn-flip:hover { background: var(--primary-dark); }
+        .btn-next { background: #1d4ed8; color: #fff; }
+        .btn-next:hover:not(:disabled) { background: #1e40af; }
+        .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-restart { background: var(--accent-light); color: #78350f; border: 1.5px solid #fde68a; }
+        .btn-restart:hover { background: #fde68a; }
+
+        /* INDEX DOTS */
+        .fc-dots { display: flex; justify-content: center; gap: 6px; margin-top: 22px; flex-wrap: wrap; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.2s; }
+        .dot.active { background: var(--primary); transform: scale(1.3); }
+        .dot.visited { background: #34d399; }
+
+        /* SCORE */
+        .fc-score { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 36px 28px; text-align: center; display: none; }
+        .fc-score-icon { font-size: 56px; margin-bottom: 12px; }
+        .fc-score-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+        .fc-score-sub { font-size: 14px; color: var(--text-muted); }
+
+        /* DARK MODE */
+        .dark body { background: #0f172a; color: #f3f4f6; }
+        .dark .topbar { background: #1e293b; border-color: #334155; }
+        .dark .fc-topic-title { color: #f3f4f6; }
+        .dark .fc-counter, .dark .fc-hint { color: #94a3b8; }
+        .dark .fc-front { background: #1e293b; border-color: #0e3d2e; }
+        .dark .fc-back  { background: linear-gradient(135deg, #0d2d1f, #0e3d2e); border-color: #16a37f; }
+        .dark .fc-question { color: #e2e8f0; }
+        .dark .fc-answer { color: #a7f3d0; }
+        .dark .fc-face-label { color: #64748b; }
+        .dark .fc-score { background: #1e293b; }
+        .dark .fc-score-title { color: #f3f4f6; }
+        .dark .btn-prev { background: #1e293b; color: #94a3b8; border-color: #334155; }
+        .dark .btn-restart { background: #44300f; color: #fcd34d; border-color: #78350f; }
+        .dark .dot { background: #334155; }
+
+        @media (max-width: 600px) {
+            .topbar-nav { display: none; }
+            .fc-face { padding: 24px 20px; min-height: 280px; }
+            .fc-card-wrap { min-height: 280px; }
+            .btn-ctrl { padding: 9px 16px; font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    <nav class="topbar-nav">
+        <a href="/"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/bookmarks"><i class="bi bi-bookmark-heart"></i> Bookmarks</a>
+    </nav>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+    </div>
+</header>
+
+<div th:replace="fragments/banner :: learningBanner"></div>
+
+<div class="page-wrap">
+
+    <div class="fc-header">
+        <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="fc-header-back">
+            <i class="bi bi-arrow-left"></i> Back to Topic
+        </a>
+        <div class="fc-subject" th:text="${topic.subject.name}"></div>
+        <div class="fc-topic-title" th:text="${topic.title}"></div>
+        <div class="fc-counter" id="fcCounter"
+             th:text="${totalCards} + ' interview Q&amp;A cards'"></div>
+    </div>
+
+    <!-- NO CARDS STATE -->
+    <div class="fc-empty" th:if="${cards == null or cards.isEmpty()}">
+        <div class="fc-empty-icon"><i class="bi bi-card-list"></i></div>
+        <div class="fc-empty-title">No Flashcards Found</div>
+        <p class="fc-empty-desc">
+            This topic doesn't have structured Q&amp;A content yet.<br>
+            Use the AI generator to create comprehensive content with interview questions.
+        </p>
+    </div>
+
+    <!-- FLASHCARD DECK -->
+    <div th:if="${cards != null and !cards.isEmpty()}" id="fcDeck">
+
+        <!-- PROGRESS BAR -->
+        <div class="fc-progress-wrap">
+            <div class="fc-progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+
+        <!-- CARD SCENE -->
+        <div class="fc-scene">
+            <div class="fc-card-wrap" id="fcCard" onclick="flipCard()">
+                <div class="fc-face fc-front">
+                    <span class="fc-level level-general" id="cardLevel">General</span>
+                    <div class="fc-face-label"><i class="bi bi-question-circle-fill"></i> Question</div>
+                    <div class="fc-question" id="cardQuestion">Loading...</div>
+                    <div class="fc-hint"><i class="bi bi-hand-index"></i> Click card to reveal answer</div>
+                </div>
+                <div class="fc-face fc-back">
+                    <span class="fc-level" id="cardLevelBack" style="visibility:hidden;">back</span>
+                    <div class="fc-face-label"><i class="bi bi-lightbulb-fill" style="color:var(--primary)"></i> Answer</div>
+                    <div class="fc-answer" id="cardAnswer">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="fc-controls">
+            <button class="btn-ctrl btn-prev" id="btnPrev" onclick="prevCard()" disabled>
+                <i class="bi bi-chevron-left"></i> Prev
+            </button>
+            <button class="btn-ctrl btn-flip" onclick="flipCard()">
+                <i class="bi bi-arrow-repeat"></i> Flip
+            </button>
+            <button class="btn-ctrl btn-next" id="btnNext" onclick="nextCard()">
+                Next <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- INDEX DOTS -->
+        <div class="fc-dots" id="fcDots"></div>
+
+        <!-- SCORE (shown after all cards) -->
+        <div class="fc-score" id="fcScore">
+            <div class="fc-score-icon">🎉</div>
+            <div class="fc-score-title">You've reviewed all cards!</div>
+            <p class="fc-score-sub" id="scoreText"></p>
+            <div style="margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <button class="btn-ctrl btn-restart" onclick="restartDeck()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restart
+                </button>
+                <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-ctrl btn-flip">
+                    <i class="bi bi-book-open"></i> Review Topic
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Flash cards data injected as JSON -->
+<script th:inline="javascript">
+    const CARDS = /*[[${cards}]]*/ [];
+    const TOTAL = CARDS.length;
+    let current = 0;
+    let visited = new Set();
+
+    function getLevelClass(level) {
+        if (!level) return 'level-general';
+        const l = level.toLowerCase();
+        if (l.includes('basic'))        return 'level-basic';
+        if (l.includes('intermediate')) return 'level-intermediate';
+        if (l.includes('advanced'))     return 'level-advanced';
+        return 'level-general';
+    }
+
+    function renderCard(idx) {
+        if (idx < 0 || idx >= TOTAL) return;
+        const card = CARDS[idx];
+        // reset flip
+        document.getElementById('fcCard').classList.remove('flipped');
+
+        document.getElementById('cardQuestion').textContent = card.question;
+        document.getElementById('cardAnswer').textContent   = card.answer;
+        const lClass = getLevelClass(card.level);
+        const levelEl     = document.getElementById('cardLevel');
+        const levelElBack = document.getElementById('cardLevelBack');
+        levelEl.className     = 'fc-level ' + lClass;
+        levelElBack.className = 'fc-level ' + lClass;
+        levelEl.textContent   = card.level || 'General';
+
+        // counter
+        document.getElementById('fcCounter').textContent = (idx + 1) + ' / ' + TOTAL + '  interview Q&A cards';
+
+        // progress
+        const pct = Math.round(((idx + 1) / TOTAL) * 100);
+        document.getElementById('progressFill').style.width = pct + '%';
+
+        // buttons
+        document.getElementById('btnPrev').disabled = idx === 0;
+        document.getElementById('btnNext').disabled = idx === TOTAL - 1;
+
+        // dots
+        document.querySelectorAll('.dot').forEach((d, i) => {
+            d.classList.toggle('active', i === idx);
+            d.classList.toggle('visited', visited.has(i) && i !== idx);
+        });
+
+        visited.add(idx);
+    }
+
+    function flipCard() {
+        document.getElementById('fcCard').classList.toggle('flipped');
+    }
+
+    function nextCard() {
+        if (current < TOTAL - 1) {
+            current++;
+            renderCard(current);
+        } else {
+            showScore();
+        }
+    }
+
+    function prevCard() {
+        if (current > 0) { current--; renderCard(current); }
+    }
+
+    function showScore() {
+        document.getElementById('fcDeck').querySelector('.fc-scene').style.display = 'none';
+        document.getElementById('fcDeck').querySelector('.fc-controls').style.display = 'none';
+        document.getElementById('fcDots').style.display = 'none';
+        document.getElementById('fcScore').style.display = 'block';
+        document.getElementById('scoreText').textContent =
+            'You reviewed ' + TOTAL + ' Q&A cards. Great work!';
+    }
+
+    function restartDeck() {
+        current = 0;
+        visited.clear();
+        document.getElementById('fcDeck').querySelector('.fc-scene').style.display = '';
+        document.getElementById('fcDeck').querySelector('.fc-controls').style.display = '';
+        document.getElementById('fcDots').style.display = '';
+        document.getElementById('fcScore').style.display = 'none';
+        renderCard(0);
+    }
+
+    // build dots
+    function buildDots() {
+        const container = document.getElementById('fcDots');
+        for (let i = 0; i < Math.min(TOTAL, 30); i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.title = 'Card ' + (i + 1);
+            (function(idx){ dot.onclick = () => { current = idx; renderCard(idx); }; })(i);
+            container.appendChild(dot);
+        }
+    }
+
+    // keyboard nav
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextCard(); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); prevCard(); }
+        if (e.key === 'Enter' || e.key === 'f') { flipCard(); }
+    });
+
+    // init
+    if (TOTAL > 0) {
+        buildDots();
+        renderCard(0);
+    }
+
+    // dark mode
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        const on = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', on);
+        document.getElementById('darkToggle').innerHTML = on ? '☀️ <span>Light</span>' : '🌙 <span>Dark</span>';
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkToggle').innerHTML = '☀️ <span>Light</span>';
+    }
+</script>
+</body>
+</html>

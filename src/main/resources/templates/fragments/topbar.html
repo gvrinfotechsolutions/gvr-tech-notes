@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Fragments</title>
+</head>
+<body>
+
+<!--
+  Shared topbar fragment.
+  Usage:
+    <div th:replace="fragments/topbar :: topbar(activeLink='home')"></div>
+
+  activeLink values: home | topics | bookmarks | admin
+-->
+<header th:fragment="topbar(activeLink)" class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()" title="Toggle menu"
+                style="display:none;" id="hamburgerBtn">
+            <i class="bi bi-list"></i>
+        </button>
+        <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    </div>
+    <nav class="topbar-nav">
+        <a href="/" th:classappend="${activeLink == 'home'} ? 'active'"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics" th:classappend="${activeLink == 'topics'} ? 'active'"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/bookmarks" th:classappend="${activeLink == 'bookmarks'} ? 'active'"><i class="bi bi-bookmark-heart"></i> Bookmarks</a>
+        <a href="/admin" sec:authorize="hasRole('ADMIN')" th:classappend="${activeLink == 'admin'} ? 'active'">
+            <i class="bi bi-speedometer2"></i> Admin
+        </a>
+    </nav>
+    <div class="topbar-right" style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i></button>
+        </form>
+    </div>
+</header>
+
+<!-- Shared dark mode + sidebar JS — include once per page -->
+<th:block th:fragment="darkModeScript">
+<script>
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        const on = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', on);
+        const t = document.getElementById('darkToggle');
+        if (t) t.innerHTML = on ? '☀️ <span>Light</span>' : '🌙 <span>Dark</span>';
+    }
+    (function() {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+            const t = document.getElementById('darkToggle');
+            if (t) t.innerHTML = '☀️ <span>Light</span>';
+        }
+    })();
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.toggle('open');
+        if (overlay) overlay.style.display = sidebar && sidebar.classList.contains('open') ? 'block' : 'none';
+    }
+    function closeSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.classList.remove('open');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+</script>
+</th:block>
+
+</body>
+</html>

@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.gvr.notes.exception.TopicNotFoundException;
+
 import com.gvr.notes.model.Topic;
 import com.gvr.notes.repository.TopicRepository;
 
@@ -47,7 +49,7 @@ public class TopicService {
 
     public Topic getTopicById(Long id) {
         return topicRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Topic not found with id: " + id));
+            .orElseThrow(() -> new TopicNotFoundException(id));
     }
 
     public Page<Topic> searchTopics(String keyword, Pageable pageable) {

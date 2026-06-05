@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Import Topics — GVR_T_Notes Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #16a37f; --primary-light: #e6f7f2; --primary-dark: #0e7a5f;
+            --bg: #f4f6f9; --surface: #fff; --border: #e5e9ef;
+            --text: #1e2330; --text-muted: #6b7280;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --radius: 14px; --radius-sm: 8px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Inter', sans-serif; color: var(--text); }
+
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+        .topbar-logo { font-size: 18px; font-weight: 800; color: var(--primary); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+        .topbar-nav { display: flex; align-items: center; gap: 4px; }
+        .topbar-nav a { text-decoration: none; color: var(--text-muted); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: var(--radius-sm); transition: all 0.15s; }
+        .topbar-nav a:hover { background: var(--primary-light); color: var(--primary); }
+        .btn-logout { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: var(--radius-sm); border: 1.5px solid #fca5a5; color: #ef4444; background: #fff5f5; cursor: pointer; transition: all 0.15s; }
+        .btn-logout:hover { background: #fee2e2; }
+
+        .page-wrap { max-width: 720px; margin: 36px auto; padding: 0 20px 60px; }
+
+        .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); text-decoration: none; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); margin-bottom: 24px; transition: all 0.15s; }
+        .back-link:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+        .page-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+        .page-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+
+        .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 28px; margin-bottom: 20px; }
+        .card-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--text); }
+
+        .form-group { margin-bottom: 18px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        .form-select, .form-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Inter', sans-serif; outline: none; color: var(--text); background: var(--surface); }
+        .form-select:focus, .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+        .file-drop { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafcfa; position: relative; }
+        .file-drop:hover, .file-drop.drag-over { border-color: var(--primary); background: var(--primary-light); }
+        .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .file-drop-icon { font-size: 36px; color: var(--text-muted); margin-bottom: 10px; }
+        .file-drop-text { font-size: 14px; font-weight: 600; color: var(--text-muted); }
+        .file-drop-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .file-name { font-size: 13px; font-weight: 600; color: var(--primary); margin-top: 8px; }
+
+        .btn-submit { width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; font-family: 'Inter', sans-serif; }
+        .btn-submit:hover { background: var(--primary-dark); }
+
+        .alert { padding: 14px 18px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; }
+        .alert-success { background: #f0fdf4; border: 1.5px solid #86efac; color: #15803d; }
+        .alert-error   { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; }
+
+        .how-to { background: #f8fafc; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 18px 20px; }
+        .how-to h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .how-to pre { font-size: 12px; font-family: 'Courier New', monospace; background: #1e2330; color: #86efac; padding: 14px; border-radius: 6px; white-space: pre-wrap; line-height: 1.7; }
+        .how-to p { font-size: 13px; color: var(--text-muted); margin-top: 10px; line-height: 1.6; }
+
+        @media (max-width: 600px) {
+            .topbar-nav { display: none; }
+            .page-wrap { padding: 0 14px 48px; margin-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    <nav class="topbar-nav">
+        <a href="/"><i class="bi bi-house"></i> Home</a>
+        <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/admin"><i class="bi bi-speedometer2"></i> Admin</a>
+    </nav>
+    <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+    </form>
+</header>
+
+<div class="page-wrap">
+
+    <a href="/admin" class="back-link"><i class="bi bi-arrow-left"></i> Back to Admin</a>
+
+    <div class="page-title"><i class="bi bi-cloud-upload"></i> Import Topics from Document</div>
+    <p class="page-subtitle">Upload a <strong>Markdown (.md)</strong>, PDF, or Word (.docx) file — topics are split on <code># Heading</code> lines and content is stored with full markdown formatting.</p>
+
+    <!-- SUCCESS / ERROR ALERTS -->
+    <div th:if="${success}" class="alert alert-success">
+        <i class="bi bi-check-circle-fill" style="font-size:16px;flex-shrink:0;"></i>
+        <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-error">
+        <i class="bi bi-exclamation-circle-fill" style="font-size:16px;flex-shrink:0;"></i>
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- UPLOAD FORM -->
+    <div class="card">
+        <div class="card-title"><i class="bi bi-file-earmark-arrow-up" style="color:var(--primary);"></i> Upload Document</div>
+        <form th:action="@{/admin/import-topics}" method="post" enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label class="form-label">Select Subject</label>
+                <select name="subjectId" class="form-select" required>
+                    <option value="" disabled selected>-- Choose a subject --</option>
+                    <option th:each="subject : ${subjects}"
+                            th:value="${subject.id}"
+                            th:text="${subject.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Upload File</label>
+                <div class="file-drop" id="fileDrop">
+                    <input type="file" name="file" accept=".md,.pdf,.docx,.txt" required id="fileInput"
+                           onchange="updateFileName(this)">
+                    <div class="file-drop-icon"><i class="bi bi-file-earmark-text"></i></div>
+                    <div class="file-drop-text">Click to browse or drag & drop</div>
+                    <div class="file-drop-sub">Accepted: Markdown (.md) · PDF · Word (.docx)</div>
+                    <div class="file-name" id="fileNameDisplay" style="display:none;"></div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-cloud-upload"></i> Import Topics
+            </button>
+        </form>
+    </div>
+
+    <!-- HOW-TO GUIDE -->
+    <div class="card">
+        <div class="card-title"><i class="bi bi-info-circle" style="color:#2563eb;"></i> How to Format Your Document</div>
+        <div class="how-to">
+            <h3>✅ Recommended: Markdown (.md)</h3>
+            <pre># Spring Boot Basics
+## Introduction
+Spring Boot is an opinionated framework...
+
+## How It Works
+Auto-configuration scans the classpath...
+
+# Dependency Injection
+## Theory &amp; Internals
+DI is a design pattern where objects receive dependencies...</pre>
+            <p>
+                <strong>Markdown (.md) — Best option:</strong> Use <code># Topic Title</code> (single <code>#</code>) as topic separators.
+                Everything below — including <code>## </code> section headers, <code>**bold**</code>, <code>`code`</code>, tables, and code fences — is stored as markdown and rendered beautifully.<br><br>
+                <strong>Word (.docx):</strong> Use <strong>Heading 1</strong> style for topic titles. Use <strong>Heading 2</strong> for section sub-headers within topics. Body text is stored as-is.<br><br>
+                <strong>PDF:</strong> Use <code># </code> (single hash) at the start of a line for topic titles.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function updateFileName(input) {
+    const display = document.getElementById('fileNameDisplay');
+    if (input.files.length > 0) {
+        display.textContent = '📄 ' + input.files[0].name;
+        display.style.display = 'block';
+    } else {
+        display.style.display = 'none';
+    }
+}
+
+// Drag-over styling
+const drop = document.getElementById('fileDrop');
+drop.addEventListener('dragover', () => drop.classList.add('drag-over'));
+drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+drop.addEventListener('drop', () => drop.classList.remove('drag-over'));
+</script>
+
+</body>
+</html>

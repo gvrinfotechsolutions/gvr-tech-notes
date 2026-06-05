@@ -1,8 +1,10 @@
 package com.gvr.notes.model;
 
+import com.gvr.notes.enums.Difficulty;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+
 @Entity
 @Data
 public class Topic {
@@ -17,7 +19,6 @@ public class Topic {
     @Column(columnDefinition = "LONGTEXT")
     private String content;
 
-    // NEW FIELD
     @Column(length = 10000)
     private String codeSnippet;
 
@@ -27,11 +28,15 @@ public class Topic {
     @Column(length = 1000)
     private String tags;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Difficulty difficulty;
+
     // MANY TOPICS BELONG TO ONE SUBJECT
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
-    
+
     @Column(nullable = false)
     private Long viewCount = 0L;
 

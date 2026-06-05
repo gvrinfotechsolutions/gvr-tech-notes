@@ -97,6 +97,19 @@
         .btn-icon-edit:hover { background: #fde68a; }
         .btn-icon-check { background: var(--primary-light); color: var(--primary); }
         .btn-icon-check:hover { background: var(--primary); color: #fff; }
+        .btn-icon-bookmark { background: #fff7ed; color: #c2410c; }
+        .btn-icon-bookmark:hover, .btn-icon-bookmark.bookmarked { background: #fed7aa; color: #c2410c; }
+
+        /* DIFFICULTY BADGES */
+        .diff-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        .diff-easy   { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .diff-medium { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+        .diff-hard   { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        /* MOBILE HAMBURGER */
+        .hamburger { display: none; background: none; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; cursor: pointer; font-size: 16px; color: var(--text-muted); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 199; }
+        .sidebar.open { transform: translateX(0) !important; }
 
         /* TOPIC TAGS + VIEWS */
         .topic-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
@@ -137,45 +150,64 @@
 
         /* ── DARK MODE ── */
         .dark body { background: #111827; color: #f3f4f6; }
-        .dark .topbar, .dark .sidebar, .dark .subject-card, .dark .search-row input { background: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6; }
+        .dark .topbar, .dark .sidebar, .dark .subject-card, .dark .search-row input, .dark .empty-full { background: #1f2937 !important; border-color: #374151 !important; color: #f3f4f6; }
         .dark .sub-link, .dark .topic-link { color: #e5e7eb; }
-        .dark .topic-row:hover { background: #2d3748; }
+        .dark .topic-row:hover { background: #2d3748; border-radius: var(--radius-sm); }
         .dark .subject-card-header { border-color: #374151; }
         .dark .topic-row { border-color: #2d3748; }
         .dark .controls-row select { background: #1f2937; color: #f3f4f6; border-color: #374151; }
         .dark .sidebar-title, .dark .progress-counts { color: #9ca3af; }
         .dark .page-btn { background: #1f2937; color: #9ca3af; border-color: #374151; }
         .dark .sub-link .count { background: #374151; color: #9ca3af; }
+        .dark .filter-btn { background: #1f2937; color: #9ca3af; border-color: #374151; }
+        .dark .filter-btn.active { background: var(--primary); color: #fff; }
+        .dark .topic-tag { background: #312e81; color: #a5b4fc; border-color: #4338ca; }
+        .dark .view-count { color: #9ca3af; }
+        .dark .badge-done { background: #312e81; color: #a5b4fc; border-color: #4338ca; }
+        .dark .btn-icon-view { background: #1e3a5f; color: #60a5fa; }
+        .dark .btn-icon-edit { background: #44300f; color: #fcd34d; }
+        .dark .btn-icon-check { background: #0e3d2e; color: #34d399; }
+        .dark .btn-icon-bookmark { background: #44200a; color: #fb923c; }
+        .dark .empty-full-title { color: #e5e7eb; }
+        .dark .empty-full-desc { color: #9ca3af; }
 
         /* ── PAGE BANNER ── */
-        .page-banner { background: linear-gradient(135deg, #4338ca, #3730a3 55%, #312e81); position: relative; height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .page-banner::before { display: none; }
+        .page-banner { background: linear-gradient(135deg, #4338ca, #3730a3 55%, #312e81); position: relative; height: 140px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .page-banner-content { position: relative; z-index: 1; text-align: center; color: #fff; padding: 0 20px; }
-        .page-banner-title { font-size: clamp(20px, 3vw, 28px); font-weight: 800; letter-spacing: -0.3px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+        .page-banner-title { font-size: clamp(18px, 3vw, 26px); font-weight: 800; letter-spacing: -0.3px; text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
         .page-banner-sub { font-size: 13px; opacity: 0.88; margin-top: 6px; }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 1024px) { .sidebar { width: 180px; } }
         @media (max-width: 768px) {
-            .sidebar { display: none; }
+            .sidebar { position: fixed; left: 0; top: 56px; bottom: 0; z-index: 200; transform: translateX(-100%); transition: transform 0.25s ease; width: 240px; overflow-y: auto; }
+            .hamburger { display: inline-flex; align-items: center; }
+            .sidebar-overlay { display: block; }
             .content { padding: 16px 14px; }
             .subject-header-right { width: 100%; }
         }
         @media (max-width: 540px) {
             .topbar-nav { display: none; }
-            .topbar { padding: 0 14px; }
+            .topbar { padding: 0 12px; }
             .topic-row { flex-wrap: wrap; }
             .btn-dark-toggle span { display: none; }
+            .search-row form { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()" style="display:none;"></div>
+
 <header class="topbar">
-    <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()" title="Toggle subjects"><i class="bi bi-list"></i></button>
+        <a href="/" class="topbar-logo"><i class="bi bi-journal-richtext"></i> GVR_T_Notes</a>
+    </div>
     <nav class="topbar-nav">
         <a href="/"><i class="bi bi-house"></i> Home</a>
         <a href="/topics" class="active"><i class="bi bi-grid"></i> Topics</a>
+        <a href="/bookmarks"><i class="bi bi-bookmark-heart"></i> Bookmarks</a>
         <a href="/admin" sec:authorize="hasRole('ADMIN')"><i class="bi bi-speedometer2"></i> Admin</a>
     </nav>
     <div class="topbar-right">
@@ -223,10 +255,14 @@
 
         <!-- FILTER BAR -->
         <div class="filter-bar">
-            <span style="font-size:12px;font-weight:700;color:var(--text-muted);">Show:</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-muted);">Status:</span>
             <button class="filter-btn active" id="filterAll" onclick="filterTopics('all')">All</button>
             <button class="filter-btn" id="filterPending" onclick="filterTopics('pending')"><i class="bi bi-circle"></i> Not Started</button>
             <button class="filter-btn" id="filterDone" onclick="filterTopics('done')"><i class="bi bi-check-circle-fill"></i> Completed</button>
+            <span style="font-size:12px;font-weight:700;color:var(--text-muted);margin-left:8px;">Difficulty:</span>
+            <button class="filter-btn" id="filterEasy"   onclick="filterDifficulty('EASY')">🟢 Easy</button>
+            <button class="filter-btn" id="filterMedium" onclick="filterDifficulty('MEDIUM')">🟡 Medium</button>
+            <button class="filter-btn" id="filterHard"   onclick="filterDifficulty('HARD')">🔴 Hard</button>
         </div>
 
         <!-- PAGE SIZE CONTROL -->
@@ -307,22 +343,24 @@
                         <div th:each="topic : ${entry.value}"
                              class="topic-row"
                              th:classappend="${completedTopicsMap != null and completedTopicsMap[topic.id]} ? 'topic-done' : 'topic-pending'"
-                             th:attr="data-topic-id=${topic.id}">
+                             th:attr="data-topic-id=${topic.id},data-difficulty=${topic.difficulty}">
                             <div style="min-width:0;flex:1;">
                                 <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="topic-link">
                                     <i class="bi bi-journal-text" style="color:var(--primary);flex-shrink:0;"></i>
                                     <span th:text="${topic.title}"></span>
                                 </a>
-                                <div class="topic-tags" th:if="${topic.tags != null and !#strings.isEmpty(topic.tags)}">
-                                    <a th:each="tag : ${#strings.arraySplit(topic.tags, ',')}"
+                                <div class="topic-tags">
+                                    <!-- DIFFICULTY BADGE -->
+                                    <span th:if="${topic.difficulty != null}"
+                                          th:classappend="${topic.difficulty.name() == 'EASY'} ? 'diff-easy' : (${topic.difficulty.name() == 'MEDIUM'} ? 'diff-medium' : 'diff-hard')"
+                                          class="diff-badge"
+                                          th:text="${topic.difficulty.name() == 'EASY'} ? '🟢 Easy' : (${topic.difficulty.name() == 'MEDIUM'} ? '🟡 Medium' : '🔴 Hard')">
+                                    </span>
+                                    <a th:each="tag : ${#strings.arraySplit(topic.tags != null ? topic.tags : '', ',')}"
+                                       th:if="${!#strings.isEmpty(#strings.trim(tag))}"
                                        th:href="@{/searchTopics(keyword=${#strings.trim(tag)})}"
                                        th:text="${#strings.trim(tag)}"
                                        class="topic-tag"></a>
-                                    <span class="view-count" th:if="${topic.viewCount > 0}">
-                                        <i class="bi bi-eye"></i> <span th:text="${topic.viewCount}"></span>
-                                    </span>
-                                </div>
-                                <div class="topic-tags" th:if="${topic.tags == null or #strings.isEmpty(topic.tags)}">
                                     <span class="view-count" th:if="${topic.viewCount > 0}">
                                         <i class="bi bi-eye"></i> <span th:text="${topic.viewCount}"></span>
                                     </span>
@@ -340,6 +378,14 @@
                                 </span>
                                 <!-- VIEW -->
                                 <a th:href="@{/viewTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-view" title="View"><i class="bi bi-eye"></i></a>
+                                <!-- BOOKMARK (AJAX) -->
+                                <button class="btn-icon btn-icon-bookmark"
+                                        th:id="'bm-' + ${topic.id}"
+                                        th:attr="data-id=${topic.id}"
+                                        title="Bookmark"
+                                        onclick="toggleBookmark(this)">
+                                    <i class="bi bi-bookmark"></i>
+                                </button>
                                 <!-- EDIT -->
                                 <a th:href="@{/editTopic/{id}(id=${topic.id})}" class="btn-icon btn-icon-edit" title="Edit" sec:authorize="hasRole('ADMIN')"><i class="bi bi-pencil"></i></a>
                                 <!-- MARK COMPLETE (AJAX) -->
@@ -422,15 +468,65 @@
     }
 
     // ── Completion filter ──
-    function filterTopics(mode) {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('filter' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+    let activeStatusFilter = 'all';
+    let activeDiffFilter   = null;
+
+    function applyFilters() {
         document.querySelectorAll('.topic-row').forEach(row => {
             const done = row.classList.contains('topic-done');
-            if (mode === 'all') row.style.display = '';
-            else if (mode === 'done') row.style.display = done ? '' : 'none';
-            else row.style.display = !done ? '' : 'none';
+            const diff = (row.getAttribute('data-difficulty') || '').toUpperCase();
+            let show = true;
+            if (activeStatusFilter === 'done')    show = done;
+            if (activeStatusFilter === 'pending') show = !done;
+            if (activeDiffFilter && diff !== activeDiffFilter) show = false;
+            row.style.display = show ? '' : 'none';
         });
+    }
+
+    function filterTopics(mode) {
+        ['all','pending','done'].forEach(m => {
+            const el = document.getElementById('filter' + m.charAt(0).toUpperCase() + m.slice(1));
+            if (el) el.classList.remove('active');
+        });
+        const target = document.getElementById('filter' + mode.charAt(0).toUpperCase() + mode.slice(1));
+        if (target) target.classList.add('active');
+        activeStatusFilter = mode;
+        applyFilters();
+    }
+
+    function filterDifficulty(diff) {
+        const ids = { EASY: 'filterEasy', MEDIUM: 'filterMedium', HARD: 'filterHard' };
+        Object.values(ids).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('active');
+        });
+        if (activeDiffFilter === diff) {
+            activeDiffFilter = null; // toggle off
+        } else {
+            activeDiffFilter = diff;
+            const el = document.getElementById(ids[diff]);
+            if (el) el.classList.add('active');
+        }
+        applyFilters();
+    }
+
+    // ── AJAX bookmark toggle ──
+    function toggleBookmark(btn) {
+        const id = btn.getAttribute('data-id');
+        fetch('/bookmarks/toggle/' + id, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => {
+                const icon = btn.querySelector('i');
+                if (data.bookmarked) {
+                    btn.classList.add('bookmarked');
+                    icon.className = 'bi bi-bookmark-fill';
+                    btn.title = 'Remove bookmark';
+                } else {
+                    btn.classList.remove('bookmarked');
+                    icon.className = 'bi bi-bookmark';
+                    btn.title = 'Bookmark';
+                }
+            });
     }
 
     // ── AJAX mark complete ──
@@ -445,7 +541,6 @@
                 btn.style.display = 'none';
                 const badge = document.getElementById('badge-' + id);
                 if (badge) badge.style.display = 'inline-flex';
-                // update progress bar
                 updateProgress(row.closest('.subject-card'));
             });
     }
@@ -465,6 +560,20 @@
             fill.className = 'progress-fill ' +
                 (pct < 40 ? 'fill-danger' : pct < 80 ? 'fill-warning' : 'fill-success');
         }
+    }
+
+    // ── Mobile sidebar ──
+    function toggleSidebar() {
+        const sidebar  = document.querySelector('.sidebar');
+        const overlay  = document.getElementById('sidebarOverlay');
+        const isOpen   = sidebar.classList.contains('open');
+        sidebar.classList.toggle('open');
+        overlay.style.display = isOpen ? 'none' : 'block';
+    }
+    function closeSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.remove('open');
+        document.getElementById('sidebarOverlay').style.display = 'none';
     }
 </script>
 

@@ -34,16 +34,39 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (userRepository.findByUsername(adminUsername).isEmpty()) {
+        var existing = userRepository.findByUsername(adminUsername);
 
+        if (existing.isEmpty()) {
+            // First run — create the admin user
             User admin = new User();
             admin.setUsername(adminUsername);
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(Role.ADMIN);
             admin.setStatus(Status.APPROVED);
-
             userRepository.save(admin);
             log.info("Admin user created: {}", adminUsername);
+
+        } else {
+            // User exists — ensure role and status are correct.
+            // Guards against the case where admin was re-registered via
+            // the registration form (which sets role=USER, status=PENDING).
+            User admin = existing.get();
+            boolean changed = false;
+
+            if (admin.getRole() != Role.ADMIN) {
+                log.warn("Admin user '{}' had role={} — correcting to ADMIN", adminUsername, admin.getRole());
+                admin.setRole(Role.ADMIN);
+                changed = true;
+            }
+            if (admin.getStatus() != Status.APPROVED) {
+                log.warn("Admin user '{}' had status={} — correcting to APPROVED", adminUsername, admin.getStatus());
+                admin.setStatus(Status.APPROVED);
+                changed = true;
+            }
+            if (changed) {
+                userRepository.save(admin);
+                log.info("Admin user '{}' role/status corrected", adminUsername);
+            }
         }
     }
 }

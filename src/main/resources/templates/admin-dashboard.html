@@ -190,7 +190,7 @@
         <a th:href="@{/export-pdf}" class="tile">
             <div class="tile-icon icon-red"><i class="bi bi-file-earmark-pdf"></i></div>
             <div>
-                <div class="tile-label">Export PDF</div>
+                <div class="tile-label">Export All PDF</div>
                 <div class="tile-desc">Download a full backup of all topics as PDF</div>
             </div>
         </a>
@@ -203,7 +203,42 @@
             </div>
         </a>
 
+        <a href="/admin/import-topics" class="tile">
+            <div class="tile-icon icon-blue"><i class="bi bi-cloud-upload"></i></div>
+            <div>
+                <div class="tile-label">Import Topics</div>
+                <div class="tile-desc">Upload PDF or Word doc to auto-create topics subject-wise</div>
+            </div>
+        </a>
+
+        <a href="/admin/manage-topics" class="tile">
+            <div class="tile-icon icon-red"><i class="bi bi-trash"></i></div>
+            <div>
+                <div class="tile-label">Manage / Delete</div>
+                <div class="tile-desc">Delete topics or subjects (admin only)</div>
+            </div>
+        </a>
+
     </div>
+
+    <!-- SUBJECT-WISE PDF EXPORT -->
+    <div style="margin-top:36px;">
+        <h2 style="font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-file-earmark-pdf" style="color:#ef4444;"></i> Export PDF by Subject
+        </h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;" th:if="${subjects != null}">
+            <a th:each="sub : ${subjects}"
+               th:href="@{/export-pdf/subject/{id}(id=${sub.id})}"
+               style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#fef2f2;color:#b91c1c;border:1.5px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:all 0.15s;"
+               onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span th:text="${sub.name}"></span>
+            </a>
+        </div>
+        <p th:if="${subjects == null or subjects.isEmpty()}"
+           style="font-size:13px;color:var(--text-muted);">No subjects found.</p>
+    </div>
+
 </div>
 
 </body>

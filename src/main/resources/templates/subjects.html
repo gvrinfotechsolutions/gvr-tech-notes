@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>Subjects — GVR_T_Notes</title>
     <meta charset="UTF-8">
@@ -58,8 +59,38 @@
             .page-wrap{padding:0 14px 48px;margin-top:20px;}
             .subject-row{flex-direction:column;align-items:flex-start;}
             .subject-row-actions{width:100%;}
-            .btn-view,.btn-edit{flex:1;justify-content:center;}
+            .btn-view,.btn-edit,.btn-pdf{flex:1;justify-content:center;}
         }
+
+        /* ── PDF EXPORT BUTTON ── */
+        .btn-pdf{display:inline-flex;align-items:center;gap:5px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;white-space:nowrap;}
+        .btn-pdf:hover{background:#fee2e2;border-color:#fca5a5;}
+
+        /* ── DARK MODE ── */
+        .dark body{background:#111827;color:#f3f4f6;}
+        .dark .topbar{background:#1f2937;border-color:#374151;}
+        .dark .topbar-logo{color:#34d399;}
+        .dark .topbar-nav a{color:#9ca3af;}
+        .dark .topbar-nav a:hover{background:#0e3d2e;color:#34d399;}
+        .dark .back-link{background:#1f2937;border-color:#374151;color:#9ca3af;}
+        .dark .back-link:hover{background:#0e3d2e;color:#34d399;border-color:#34d399;}
+        .dark .page-title{color:#f3f4f6;}
+        .dark .page-subtitle{color:#9ca3af;}
+        .dark .subject-row{background:#1f2937;border-color:#374151;border-left-color:var(--primary);}
+        .dark .subject-row:hover{box-shadow:0 8px 24px rgba(0,0,0,.3);}
+        .dark .subject-name{color:#e5e7eb;}
+        .dark .subject-desc{color:#9ca3af;}
+        .dark .subject-badge{background:#0e3d2e;color:#34d399;}
+        .dark .btn-view{background:var(--primary-dark);color:#fff;}
+        .dark .btn-edit{background:#44300f;color:#fcd34d;border-color:#78350f;}
+        .dark .btn-pdf{background:#3b1111;color:#fca5a5;border-color:#7f1d1d;}
+        .dark .empty{background:#1f2937;border-color:#374151;}
+        .dark .empty-title{color:#e5e7eb;}
+        .dark .empty-desc{color:#9ca3af;}
+
+        /* ── DARK TOGGLE ── */
+        .btn-dark-toggle{font-size:13px;font-weight:600;padding:6px 12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);color:var(--text-muted);background:var(--bg);cursor:pointer;transition:all .15s;}
+        .btn-dark-toggle:hover{background:var(--surface);}
     </style>
 </head>
 <body>
@@ -71,9 +102,12 @@
         <a href="/topics"><i class="bi bi-grid"></i> Topics</a>
         <a href="/admin"><i class="bi bi-speedometer2"></i> Admin</a>
     </nav>
-    <form th:action="@{/logout}" method="post" style="margin:0;">
-        <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
-    </form>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <button class="btn-dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 <span>Dark</span></button>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        </form>
+    </div>
 </header>
 
 <div th:replace="fragments/banner :: learningBanner"></div>
@@ -100,8 +134,9 @@
                 </span>
             </div>
             <div class="subject-row-actions">
-                <a th:href="@{/editSubject/{id}(id=${sub.id})}" class="btn-edit"><i class="bi bi-pencil"></i> Edit</a>
                 <a th:href="@{/subjectTopics/{id}(id=${sub.id})}" class="btn-view"><i class="bi bi-book-open"></i> View Topics</a>
+                <a th:href="@{/export-pdf/subject/{id}(id=${sub.id})}" class="btn-pdf" sec:authorize="hasRole('ADMIN')"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+                <a th:href="@{/editSubject/{id}(id=${sub.id})}" class="btn-edit" sec:authorize="hasRole('ADMIN')"><i class="bi bi-pencil"></i> Edit</a>
             </div>
         </div>
     </div>
@@ -113,5 +148,18 @@
     </div>
 
 </div>
+
+<script>
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        const on = document.documentElement.classList.contains('dark');
+        localStorage.setItem('darkMode', on);
+        document.getElementById('darkToggle').innerHTML = on ? '☀️ <span>Light</span>' : '🌙 <span>Dark</span>';
+    }
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('darkToggle').innerHTML = '☀️ <span>Light</span>';
+    }
+</script>
 </body>
 </html>

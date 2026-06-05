@@ -22,4 +22,6 @@ public interface TopicNoteService {
     TopicNote getNoteByTopicId(Long topicId);
 
     long countNotes();
+
+    long countDistinctSubjects();
 }

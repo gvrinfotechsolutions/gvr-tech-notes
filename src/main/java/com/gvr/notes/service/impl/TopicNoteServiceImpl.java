@@ -146,4 +146,9 @@ public class TopicNoteServiceImpl implements TopicNoteService {
 
 	    return count;
 	}
+
+	@Override
+	public long countDistinctSubjects() {
+	    return topicNoteRepository.countDistinctSubjects();
+	}
 }

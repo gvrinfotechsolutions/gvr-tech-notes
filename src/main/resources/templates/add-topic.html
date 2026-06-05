@@ -163,7 +163,7 @@
     </form>
 </header>
 
-<div th:replace="fragments/banner :: learningBanner"></div>
+<div th:replace="~{fragments/banner :: learningBanner}"></div>
 
 <div class="page-wrap">
 
@@ -184,40 +184,40 @@
             <div class="ai-panel">
                 <div class="ai-panel-title">
                     <i class="bi bi-stars"></i> AI Content Generator
-                    <span class="ai-badge">✨ Gemini AI</span>
+                    <span class="ai-badge">✨ Groq AI</span>
                 </div>
                 <div class="ai-panel-sub">
-                    Enter the topic title and subject below, select a content type, then click Generate.
-                    All fields will be auto-filled with interview-ready content in seconds.
+                    Enter the topic title and subject, then click <strong>Generate Complete Content</strong>.
+                    AI generates a full end-to-end article covering theory, internals, comparisons,
+                    code examples, real-world scenarios, interview Q&amp;A, and a revision cheat sheet — all in one shot.
                 </div>
                 <div class="ai-controls">
-                    <div class="form-group">
+                    <div class="form-group" style="flex:2;">
                         <label>Topic Title for AI</label>
                         <input type="text" id="aiTopicTitle"
-                               placeholder="e.g. Spring Boot Bean Lifecycle, HashMap vs ConcurrentHashMap">
+                               placeholder="e.g. Strings in Java, Spring Boot Bean Lifecycle, HashMap vs ConcurrentHashMap">
                     </div>
-                    <div class="form-group" style="max-width:200px;">
+                    <div class="form-group" style="max-width:220px;">
                         <label>Subject</label>
                         <select id="aiSubject">
-                            <option value="">— Select —</option>
+                            <option value="">— Select Subject —</option>
                             <option th:each="sub : ${subjects}"
                                     th:value="${sub.name}"
                                     th:text="${sub.name}"></option>
                         </select>
                     </div>
-                    <div class="form-group" style="max-width:200px;">
-                        <label>Content Type</label>
-                        <select id="aiContentType">
-                            <option value="CONCEPT">📘 Concept Deep Dive</option>
-                            <option value="COMPARISON">⚖️ Comparison</option>
-                            <option value="CODE_PATTERN">💻 Code Pattern</option>
-                            <option value="SCENARIO">🏗️ Scenario / System Design</option>
-                            <option value="CHEAT_SHEET">📋 Cheat Sheet</option>
-                        </select>
-                    </div>
                     <button type="button" class="btn-generate" id="generateBtn" onclick="generateContent()">
-                        <i class="bi bi-stars"></i> Generate with AI
+                        <i class="bi bi-stars"></i> Generate Complete Content
                     </button>
+                </div>
+                <!-- What gets generated -->
+                <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">📘 Theory &amp; Internals</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">⚖️ Comparisons</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">💻 Code Examples</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">🏗️ Real-World Scenarios</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">🎯 10+ Interview Q&amp;A</span>
+                    <span style="font-size:11px;font-weight:700;color:var(--primary-dark);padding:3px 10px;background:var(--primary-light);border-radius:10px;">📋 Revision Cheat Sheet</span>
                 </div>
                 <div class="ai-status" id="aiStatus"></div>
             </div>
@@ -239,6 +239,16 @@
             </div>
 
             <div class="form-group">
+                <label>Difficulty Level <span class="optional">(optional)</span></label>
+                <select th:field="*{difficulty}">
+                    <option value="">— Select Difficulty —</option>
+                    <option value="EASY">🟢 Easy</option>
+                    <option value="MEDIUM">🟡 Medium</option>
+                    <option value="HARD">🔴 Hard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label>Tags <span class="optional">(optional)</span></label>
                 <input type="text" th:field="*{tags}" placeholder="Java, Streams, Lambda">
                 <div class="hint">Comma-separated tags — e.g. <code>Spring, REST, API</code></div>
@@ -246,7 +256,7 @@
 
             <div class="form-group">
                 <label>Content (Markdown)</label>
-                <textarea th:field="*{content}" id="contentTextarea" required></textarea>
+                <textarea th:field="*{content}"></textarea>
                 <div class="hint">
                     Toolbar: <code>H</code> heading &nbsp;|&nbsp; <code>B I</code> bold/italic &nbsp;|&nbsp;
                     <code>```</code> code block &nbsp;|&nbsp; <code>⊞</code> table &nbsp;|&nbsp;
@@ -294,136 +304,260 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.17/mode/clike/clike.min.js"></script>
 
 <script>
+    const LOG = (msg, data) => console.log(`[GVR-AddTopic] ${msg}`, data !== undefined ? data : '');
+    const ERR = (msg, err)  => console.error(`[GVR-AddTopic] ❌ ${msg}`, err !== undefined ? err : '');
+
     // ── CSRF ──
-    const csrfToken  = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+    const csrfMeta   = document.querySelector('meta[name="_csrf"]');
+    const csrfHMeta  = document.querySelector('meta[name="_csrf_header"]');
+    const csrfToken  = csrfMeta  ? csrfMeta.getAttribute('content')  : '';
+    const csrfHeader = csrfHMeta ? csrfHMeta.getAttribute('content') : '';
+    LOG('CSRF token loaded', csrfToken ? '✅ present' : '❌ missing');
+
+    // ── Selectors — th:field sets name="fieldName", id="fieldName" ──
+    // Using name selectors which are always correct with Thymeleaf th:field
+    const contentTA = document.querySelector('textarea[name="content"]');
+    const codeTA    = document.querySelector('textarea[name="codeSnippet"]');
+    const saveForm  = document.querySelector('form[action*="saveTopic"]');
+
+    LOG('DOM selectors', {
+        contentTA : contentTA ? `✅ found (id="${contentTA.id}", name="${contentTA.name}")` : '❌ NOT FOUND — save will fail!',
+        codeTA    : codeTA    ? `✅ found (id="${codeTA.id}", name="${codeTA.name}")` : '⚠️ not found (optional)',
+        saveForm  : saveForm  ? `✅ found → ${saveForm.action}` : '❌ NOT FOUND — save will fail!'
+    });
+
+    if (!contentTA) ERR('content textarea not found! Check th:field="*{content}" is on the textarea');
+    if (!saveForm)  ERR('save form not found! Check th:action="@{/saveTopic}" is on the form');
+
+    // ── EasyMDE init ──
+    var easyMDE;
+    try {
+        easyMDE = new EasyMDE({
+            element: contentTA,
+            spellChecker: false,
+            autosave: { enabled: false },
+            minHeight: '420px',
+            placeholder: 'Write your topic content in Markdown...',
+            toolbar: [
+                'bold', 'italic', 'strikethrough', 'heading', '|',
+                'quote', 'code', 'table', '|',
+                'unordered-list', 'ordered-list', '|',
+                'link', '|',
+                'preview', 'side-by-side', 'fullscreen', '|',
+                'guide'
+            ]
+        });
+        LOG('EasyMDE initialized ✅');
+    } catch (e) {
+        ERR('EasyMDE failed to initialize', e);
+    }
+
+    // ── CodeMirror init ──
+    var codeEditor;
+    try {
+        codeEditor = CodeMirror(document.getElementById('codeEditor'), {
+            value: codeTA ? codeTA.value : '',
+            mode: 'text/x-java', theme: 'dracula',
+            lineNumbers: true, lineWrapping: true, tabSize: 4
+        });
+        LOG('CodeMirror initialized ✅');
+    } catch (e) {
+        ERR('CodeMirror failed to initialize', e);
+    }
+
+    // ── Form submit — sync editors → textareas ──
+    if (saveForm) {
+        saveForm.addEventListener('submit', function(e) {
+            LOG('Form submit triggered');
+            try {
+                const mdContent   = easyMDE    ? easyMDE.value()        : '';
+                const codeContent = codeEditor ? codeEditor.getValue()  : '';
+                const titleValue  = document.querySelector('input[name="title"]')?.value?.trim() || '';
+                const subjectId   = document.querySelector('select[name="subject.id"]')?.value || '';
+
+                LOG('Values on submit', {
+                    titleLength   : titleValue.length,
+                    subjectId     : subjectId || '(none)',
+                    markdownChars : mdContent.length,
+                    codeChars     : codeContent.length
+                });
+
+                // ── JS validation (replaces broken HTML required on hidden textarea) ──
+                if (!titleValue) {
+                    e.preventDefault();
+                    alert('Please enter a Topic Title.');
+                    ERR('Blocked: title empty');
+                    return;
+                }
+                if (!subjectId) {
+                    e.preventDefault();
+                    alert('Please select a Subject.');
+                    ERR('Blocked: subject not selected');
+                    return;
+                }
+                if (!mdContent || mdContent.trim() === '') {
+                    e.preventDefault();
+                    alert('Please write some Content before saving.');
+                    ERR('Blocked: content empty');
+                    return;
+                }
+
+                // ── Sync editors → hidden textareas ──
+                if (contentTA) {
+                    contentTA.value = mdContent;
+                    LOG('✅ contentTA synced', mdContent.substring(0, 80) + '...');
+                } else {
+                    ERR('contentTA is null — content will NOT be saved!');
+                }
+                if (codeTA) {
+                    codeTA.value = codeContent;
+                    LOG('✅ codeTA synced', codeContent.length + ' chars');
+                }
+
+                LOG('✅ Form submitting now...');
+            } catch (err) {
+                ERR('Exception in submit handler — preventing submit to avoid data loss', err);
+                e.preventDefault();
+            }
+        });
+        LOG('✅ Submit listener attached to save form');
+    } else {
+        ERR('Save form NOT found — submit listener NOT attached!');
+    }
 
     // ── AI Content Generator ──
     async function generateContent() {
-        const topicTitle  = document.getElementById('aiTopicTitle').value.trim();
-        const subject     = document.getElementById('aiSubject').value.trim();
-        const contentType = document.getElementById('aiContentType').value;
+        const topicTitle = document.getElementById('aiTopicTitle').value.trim();
+        const subject    = document.getElementById('aiSubject').value.trim();
 
-        if (!topicTitle) {
-            showAiStatus('error', '⚠️ Please enter a topic title before generating.');
-            return;
-        }
-        if (!subject) {
-            showAiStatus('error', '⚠️ Please select a subject before generating.');
-            return;
-        }
+        LOG('Generate clicked', { topicTitle, subject });
+
+        if (!topicTitle) { showAiStatus('error', '⚠️ Please enter a topic title.'); return; }
+        if (!subject)    { showAiStatus('error', '⚠️ Please select a subject.');     return; }
 
         const btn = document.getElementById('generateBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spin">⟳</span> Generating...';
-        showAiStatus('loading', '🤖 Calling Gemini AI... This takes 5-15 seconds. Please wait.');
+        showAiStatus('loading', '🤖 AI is generating comprehensive content (theory + internals + code + interview Q&amp;A)... This takes 30–60 seconds. You can continue using the app.');
 
         try {
-            const res = await fetch('/admin/generate-content', {
+            // Step 1: kick off async job — returns immediately with a jobId
+            const startRes = await fetch('/admin/generate-content', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken
-                },
-                body: JSON.stringify({ topicTitle, subject, contentType })
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify({ topicTitle, subject, contentType: 'COMPREHENSIVE', aiMode: 'GENERATE' })
+            });
+            const startData = await startRes.json();
+            const jobId = startData.jobId;
+            LOG('Job started', jobId);
+
+            // Step 2: poll every 4 seconds until done (max 3 minutes)
+            let elapsed = 0;
+            const maxWait = 180000;
+            const interval = 4000;
+            const data = await new Promise((resolve, reject) => {
+                const timer = setInterval(async () => {
+                    elapsed += interval;
+                    if (elapsed > maxWait) {
+                        clearInterval(timer);
+                        reject(new Error('Generation timed out after 3 minutes.'));
+                        return;
+                    }
+                    try {
+                        const pollRes  = await fetch(`/admin/generate-content/status/${jobId}`);
+                        const pollData = await pollRes.json();
+                        LOG('Poll result', pollData.status);
+                        if (pollData.status === 'PENDING') return; // still running
+                        clearInterval(timer);
+                        resolve(pollData);
+                    } catch (e) { /* transient poll error — keep trying */ }
+                }, interval);
             });
 
-            const data = await res.json();
-
             if (data.error) {
+                ERR('API returned error', data.error);
                 showAiStatus('error', '❌ ' + data.error);
                 return;
             }
 
-            // ── Auto-fill all form fields ──
+            LOG('Generated content received', {
+                markdownLength : data.markdownContent?.length || 0,
+                codeLength     : data.codeSnippet?.length     || 0,
+                codeLanguage   : data.codeLanguage            || '(none)',
+                tags           : data.tags                    || '(none)',
+                summary        : data.summary                 || '(none)'
+            });
 
-            // 1. Topic title
+            // 1. Title
             const titleInput = document.querySelector('input[name="title"]');
-            if (titleInput && !titleInput.value) titleInput.value = topicTitle;
-
-            // 2. Markdown content via EasyMDE
-            if (data.markdownContent) {
-                easyMDE.value(data.markdownContent);
+            if (titleInput && !titleInput.value) {
+                titleInput.value = topicTitle;
+                LOG('Title field filled ✅');
             }
 
-            // 3. Code snippet via CodeMirror
-            if (data.codeSnippet) {
+            // 2. Markdown content → EasyMDE
+            if (data.markdownContent && easyMDE) {
+                easyMDE.value(data.markdownContent);
+                LOG('EasyMDE filled ✅', data.markdownContent.length + ' chars');
+            } else {
+                ERR('markdownContent missing or easyMDE null', { hasContent: !!data.markdownContent, hasEditor: !!easyMDE });
+            }
+
+            // 3. Code snippet → CodeMirror
+            if (data.codeSnippet && codeEditor) {
                 codeEditor.setValue(data.codeSnippet);
+                LOG('CodeMirror filled ✅');
             }
 
             // 4. Code language dropdown
             if (data.codeLanguage) {
-                const langSelect = document.querySelector('select[name="codeLanguage"]');
-                if (langSelect) langSelect.value = data.codeLanguage;
+                const langSel = document.querySelector('select[name="codeLanguage"]');
+                if (langSel) { langSel.value = data.codeLanguage; LOG('Language set ✅', data.codeLanguage); }
+                else         { ERR('Language select not found'); }
             }
 
             // 5. Tags
             if (data.tags) {
                 const tagsInput = document.querySelector('input[name="tags"]');
-                if (tagsInput) tagsInput.value = data.tags;
+                if (tagsInput) { tagsInput.value = data.tags; LOG('Tags filled ✅', data.tags); }
             }
 
-            // 6. Subject dropdown — sync with AI subject selection
-            const subjectSelect = document.querySelector('select[name="subject.id"]');
-            if (subjectSelect && subject) {
-                Array.from(subjectSelect.options).forEach(opt => {
+            // 6. Subject dropdown
+            const subjectSel = document.querySelector('select[name="subject.id"]');
+            if (subjectSel && subject) {
+                Array.from(subjectSel.options).forEach(opt => {
                     if (opt.text.toLowerCase().includes(subject.toLowerCase())) {
-                        subjectSelect.value = opt.value;
+                        subjectSel.value = opt.value;
+                        LOG('Subject synced ✅', opt.text);
                     }
                 });
             }
 
-            showAiStatus('success',
-                '✅ Content generated successfully! Review and edit as needed, then save.');
-
-            // Scroll down to content
-            document.querySelector('.EasyMDEContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            showAiStatus('success', '✅ Complete content generated! Review each section in the editor below, then click Save Topic.');
+            const mdeContainer = document.querySelector('.EasyMDEContainer');
+            if (mdeContainer) mdeContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         } catch (err) {
-            showAiStatus('error', '❌ Network error. Please check your connection and try again.');
-            console.error(err);
+            ERR('Network/parse error during generate', err);
+            showAiStatus('error', '❌ Error: ' + err.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-stars"></i> Generate with AI';
+            btn.innerHTML = '<i class="bi bi-stars"></i> Generate Complete Content';
         }
     }
 
     function showAiStatus(type, message) {
         const el = document.getElementById('aiStatus');
+        if (!el) { ERR('aiStatus element not found'); return; }
         el.className = 'ai-status ' + type;
         el.innerHTML = message;
     }
 
-    // Allow Enter key in AI title input to trigger generate
     document.getElementById('aiTopicTitle').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') { e.preventDefault(); generateContent(); }
     });
 
-    var easyMDE = new EasyMDE({
-        element: document.getElementById('contentTextarea'),
-        spellChecker: false,
-        autosave: { enabled: false },
-        minHeight: '420px',
-        placeholder: 'Write your topic content in Markdown...',
-        toolbar: [
-            'bold', 'italic', 'strikethrough', 'heading', '|',
-            'quote', 'code', 'table', '|',
-            'unordered-list', 'ordered-list', '|',
-            'link', '|',
-            'preview', 'side-by-side', 'fullscreen', '|',
-            'guide'
-        ]
-    });
-
-    var codeEditor = CodeMirror(document.getElementById('codeEditor'), {
-        value: document.getElementById('codeTextarea').value || '',
-        mode: 'text/x-java', theme: 'dracula',
-        lineNumbers: true, lineWrapping: true, tabSize: 4
-    });
-
-    document.querySelector('form').addEventListener('submit', function() {
-        document.getElementById('codeTextarea').value = codeEditor.getValue();
-    });
+    LOG('=== Add Topic page fully initialized ===');
 </script>
 </body>
 </html>

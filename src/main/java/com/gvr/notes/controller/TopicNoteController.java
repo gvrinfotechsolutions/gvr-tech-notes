@@ -75,10 +75,7 @@ public class TopicNoteController {
 	    long totalNotes = topicNoteService.countNotes();
 	    model.addAttribute("totalNotes", totalNotes);
 
-	    long subjectsCovered = notesPage.getContent().stream()
-	            .map(n -> n.getTopic().getSubject().getId())
-	            .distinct()
-	            .count();
+	    long subjectsCovered = topicNoteService.countDistinctSubjects();
 	    model.addAttribute("subjectsCovered", subjectsCovered);
 
 	    log.info("Loaded {} notes",

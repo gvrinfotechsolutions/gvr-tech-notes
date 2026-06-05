@@ -1,6 +1,8 @@
 package com.gvr.notes.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,8 +10,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.gvr.notes.model.User;
+import com.gvr.notes.model.Subject;
+import com.gvr.notes.model.Topic;
+import com.gvr.notes.service.DocumentImportService;
+import com.gvr.notes.service.SubjectService;
+import com.gvr.notes.service.TopicService;
 import com.gvr.notes.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -19,76 +28,156 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AdminController {
 
-	private final UserService userService;
+    private final UserService userService;
+    private final TopicService topicService;
+    private final SubjectService subjectService;
+    private final DocumentImportService documentImportService;
 
+    public AdminController(UserService userService,
+                           TopicService topicService,
+                           SubjectService subjectService,
+                           DocumentImportService documentImportService) {
+        this.userService = userService;
+        this.topicService = topicService;
+        this.subjectService = subjectService;
+        this.documentImportService = documentImportService;
+    }
 
+    // ── PENDING USERS ────────────────────────────────────────────────────────
 
-	public AdminController(UserService userService) {
+    @GetMapping("/pending-users")
+    public String pendingUsers(Model model) {
+        log.info("Fetching pending users");
+        model.addAttribute("users", userService.getPendingUsers());
+        return "pending-users";
+    }
 
-		this.userService = userService;
-		
-	}
+    @PostMapping("/approve/{id}")
+    public String approveUser(@PathVariable Long id) {
+        log.info("Approving user. userId={}", id);
+        userService.approveUser(id);
+        return "redirect:/admin/pending-users";
+    }
 
-	@GetMapping("/pending-users")
-	public String pendingUsers(Model model) {
+    @PostMapping("/reject/{id}")
+    public String rejectUser(@PathVariable Long id) {
+        log.warn("Rejecting user. userId={}", id);
+        userService.rejectUser(id);
+        return "redirect:/admin/pending-users";
+    }
 
-	    log.info("Fetching pending users");
+    // ── DELETE TOPIC (Admin only) ────────────────────────────────────────────
 
-	    List<User> pendingUsers = userService.getPendingUsers();
+    @PostMapping("/deleteTopic/{id}")
+    public String deleteTopic(@PathVariable Long id, RedirectAttributes ra) {
+        log.warn("Admin deleting topic. topicId={}", id);
+        try {
+            topicService.deleteTopic(id);
+            ra.addFlashAttribute("success", "Topic deleted successfully.");
+            log.info("Topic deleted. topicId={}", id);
+        } catch (Exception e) {
+            log.error("Failed to delete topic. topicId={}", id, e);
+            ra.addFlashAttribute("error", "Could not delete topic: " + e.getMessage());
+        }
+        return "redirect:/admin/manage-topics";
+    }
 
-	    log.info("Found {} pending users", pendingUsers.size());
+    // ── DELETE SUBJECT (Admin only) ──────────────────────────────────────────
 
-	    model.addAttribute("users", pendingUsers);
+    @PostMapping("/deleteSubject/{id}")
+    public String deleteSubject(@PathVariable Long id, RedirectAttributes ra) {
+        log.warn("Admin deleting subject. subjectId={}", id);
+        try {
+            long topicCount = topicService.countBySubjectId(id);
+            if (topicCount > 0) {
+                ra.addFlashAttribute("error",
+                    "Cannot delete subject — it still has " + topicCount
+                    + " topic(s). Delete or reassign all topics first.");
+                return "redirect:/admin/manage-topics";
+            }
+            subjectService.deleteSubject(id);
+            ra.addFlashAttribute("success", "Subject deleted successfully.");
+            log.info("Subject deleted. subjectId={}", id);
+        } catch (Exception e) {
+            log.error("Failed to delete subject. subjectId={}", id, e);
+            ra.addFlashAttribute("error", "Could not delete subject: " + e.getMessage());
+        }
+        return "redirect:/admin/manage-topics";
+    }
 
-	    return "pending-users";
-	}
+    // ── MANAGE TOPICS / SUBJECTS PAGE ────────────────────────────────────────
 
-	@PostMapping("/approve/{id}")
-	public String approveUser(@PathVariable Long id) {
+    @GetMapping("/manage-topics")
+    public String manageTopics(Model model) {
+        log.info("Admin manage-topics page");
+        model.addAttribute("subjects", subjectService.getAllSubjects());
+        model.addAttribute("subjectTopicCountMap", subjectService.getSubjectTopicCountMap());
+        model.addAttribute("allTopics", topicService.getAllTopics());
+        return "admin-manage-topics";
+    }
 
-	    log.info("User approval requested. userId={}", id);
+    // ── IMPORT TOPICS FROM DOCUMENT ──────────────────────────────────────────
 
-	    userService.approveUser(id);
+    @GetMapping("/import-topics")
+    public String importTopicsPage(Model model) {
+        log.info("Admin import-topics page");
+        model.addAttribute("subjects", subjectService.getAllSubjects());
+        return "admin-import-topics";
+    }
 
-	    log.info("User approved successfully. userId={}", id);
+    @PostMapping("/import-topics")
+    public String importTopics(@RequestParam("file") MultipartFile file,
+                               @RequestParam("subjectId") Long subjectId,
+                               RedirectAttributes ra) {
+        log.info("Admin import-topics upload. subjectId={}, filename={}",
+                subjectId, file.getOriginalFilename());
 
-	    return "redirect:/admin/pending-users";
-	}
+        if (file.isEmpty()) {
+            ra.addFlashAttribute("error", "Please select a file to upload.");
+            return "redirect:/admin/import-topics";
+        }
 
-	@PostMapping("/reject/{id}")
-	public String rejectUser(@PathVariable Long id) {
+        Subject subject = subjectService.getSubjectById(subjectId);
+        if (subject == null) {
+            ra.addFlashAttribute("error", "Subject not found.");
+            return "redirect:/admin/import-topics";
+        }
 
-	    log.warn("User rejection requested. userId={}", id);
+        try {
+            Map<String, String> parsedTopics = documentImportService.parseDocument(file);
 
-	    userService.rejectUser(id);
+            if (parsedTopics.isEmpty()) {
+                ra.addFlashAttribute("error",
+                    "No topics found. For .md files: use '# Topic Title' (single #) as topic boundary. " +
+                    "For .docx files: use Heading 1 style for topic titles.");
+                return "redirect:/admin/import-topics";
+            }
 
-	    log.info("User rejected successfully. userId={}", id);
+            List<String> created = new ArrayList<>();
+            for (Map.Entry<String, String> entry : parsedTopics.entrySet()) {
+                Topic topic = new Topic();
+                topic.setTitle(entry.getKey());
+                topic.setContent(entry.getValue());
+                topic.setSubject(subject);
+                topicService.saveTopic(topic);
+                created.add(entry.getKey());
+                log.info("Imported topic '{}' into subject '{}'",
+                        entry.getKey(), subject.getName());
+            }
 
-	    return "redirect:/admin/pending-users";
-	}
+            ra.addFlashAttribute("success",
+                created.size() + " topic(s) imported into '"
+                + subject.getName() + "': " + String.join(", ", created));
 
-	/*
-	 * @GetMapping("/reindex-solr") public String reindexSolr(RedirectAttributes ra)
-	 * {
-	 * 
-	 * log.info("Solr reindex operation started");
-	 * 
-	 * try {
-	 * 
-	 * solrService.reindexAllTopics();
-	 * 
-	 * log.info("Solr reindex completed successfully");
-	 * 
-	 * ra.addFlashAttribute("success", "Solr Reindex Completed Successfully");
-	 * 
-	 * } catch (Exception e) {
-	 * 
-	 * log.error("Solr reindex failed", e);
-	 * 
-	 * ra.addFlashAttribute("error", "Solr Reindex Failed"); }
-	 * 
-	 * return "redirect:/admin"; }
-	 */
-	
-	
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/import-topics";
+        } catch (Exception e) {
+            log.error("Failed to import topics from document", e);
+            ra.addFlashAttribute("error", "Import failed: " + e.getMessage());
+            return "redirect:/admin/import-topics";
+        }
+
+        return "redirect:/admin/import-topics";
+    }
 }

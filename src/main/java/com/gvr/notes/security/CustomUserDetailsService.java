@@ -4,6 +4,7 @@ import com.gvr.notes.enums.Status;
 import com.gvr.notes.model.User;
 import com.gvr.notes.repository.UserRepository;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,8 +33,12 @@ public class CustomUserDetailsService
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
 
-        if (user.getStatus() == Status.PENDING || user.getStatus() == Status.REJECTED) {
-            throw new DisabledException("Account not approved");
+        if (user.getStatus() == Status.PENDING) {
+            throw new DisabledException("Account pending admin approval");
+        }
+
+        if (user.getStatus() == Status.REJECTED) {
+            throw new LockedException("Account registration was rejected");
         }
 
         return new org.springframework.security.core.userdetails.User(

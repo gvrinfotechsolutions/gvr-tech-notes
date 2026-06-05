@@ -17,6 +17,14 @@ public class GlobalExceptionHandler {
         return "error";
     }
 
+    @ExceptionHandler(TopicNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleTopicNotFound(TopicNotFoundException ex, Model model) {
+        log.warn("Topic not found: {}", ex.getMessage());
+        model.addAttribute("errorMessage", ex.getMessage());
+        return "error";
+    }
+
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleRuntimeException(RuntimeException ex, Model model) {

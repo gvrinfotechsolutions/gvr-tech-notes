@@ -19,7 +19,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 
 						// PUBLIC PAGES
-						.requestMatchers("/login", "/register", "/error", "/css/**", "/js/**", "/images/**").permitAll()
+						.requestMatchers("/login", "/register", "/forgot-password", "/reset-password", "/error", "/css/**", "/js/**", "/images/**").permitAll()
 
 						// ADMIN ONLY URLS
 						.requestMatchers(
@@ -28,11 +28,20 @@ public class SecurityConfig {
 								"/addTopic", "/addTopic/**",
 								"/edit/**", "/delete/**",
 								"/admin/**",
-								"/export-pdf"
+								"/export-pdf",
+								"/export-pdf/subject/**"
 						).hasRole("ADMIN")
 
 						// USER + ADMIN ACCESS
-						.requestMatchers("/", "/topics/**", "/view-topic/**").hasAnyRole("ADMIN", "USER")
+						.requestMatchers(
+								"/", "/topics/**", "/view-topic/**",
+								"/viewTopic/**", "/subjectTopics/**", "/all-topics",
+								"/searchTopics", "/filterByTag",
+								"/completeTopic/**", "/resetProgress/**", "/trackView/**",
+								"/notes/**", "/notes-view/**",
+								"/bookmarks", "/bookmarks/**",
+								"/flashcards/**"
+						).hasAnyRole("ADMIN", "USER")
 
 						// ALL OTHER REQUESTS
 						.anyRequest().authenticated())
@@ -45,8 +54,14 @@ public class SecurityConfig {
 						.defaultSuccessUrl("/", true)
 
 						.failureHandler((request, response, exception) -> {
-							String reason = (exception instanceof org.springframework.security.authentication.DisabledException)
-									? "pending" : "true";
+							String reason;
+							if (exception instanceof org.springframework.security.authentication.DisabledException) {
+								reason = "pending";
+							} else if (exception instanceof org.springframework.security.authentication.LockedException) {
+								reason = "rejected";
+							} else {
+								reason = "true";
+							}
 							response.sendRedirect("/login?error=" + reason);
 						})
 
@@ -67,7 +82,7 @@ public class SecurityConfig {
 
 				// CSRF is enabled; JS fetch calls must include the X-CSRF-TOKEN header
 				.csrf(csrf -> csrf
-						.ignoringRequestMatchers("/trackView/**", "/completeTopic/ajax/**"));
+						.ignoringRequestMatchers("/trackView/**", "/completeTopic/ajax/**", "/bookmarks/toggle/**"));
 
 		return http.build();
 	}

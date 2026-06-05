@@ -78,6 +78,20 @@ public class TopicController {
                 .body(new InputStreamResource(pdf));
     }
 
+    @GetMapping("/export-pdf/subject/{subjectId}")
+    public ResponseEntity<InputStreamResource> exportSubjectPdf(@PathVariable Long subjectId) {
+        Subject subject = subjectService.getSubjectById(subjectId);
+        Page<Topic> page = topicService.getTopicsBySubject(subjectId, 0, Integer.MAX_VALUE);
+        ByteArrayInputStream pdf = pdfExportService.exportSubjectPdf(subject, page.getContent());
+        String filename = "GVR_Notes_" + subject.getName().replaceAll("[^a-zA-Z0-9]", "_") + ".pdf";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=" + filename);
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(new InputStreamResource(pdf));
+    }
+
     @GetMapping("/editTopic/{id}")
     public String editTopic(@PathVariable Long id, Model model) {
         model.addAttribute("topic", topicService.getTopicById(id));
@@ -175,8 +189,10 @@ public class TopicController {
     public String adminDashboard(Model model) {
         model.addAttribute("pendingCount", userService.getPendingUsers().size());
         model.addAttribute("totalTopics", topicService.countAll());
-        model.addAttribute("totalSubjects", subjectService.getAllSubjects().size());
+        List<Subject> subjects = subjectService.getAllSubjects();
+        model.addAttribute("totalSubjects", subjects.size());
         model.addAttribute("totalUsers", userService.countAll());
+        model.addAttribute("subjects", subjects); // for subject-wise PDF export
         return "admin-dashboard";
     }
 
